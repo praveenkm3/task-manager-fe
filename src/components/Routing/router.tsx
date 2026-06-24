@@ -1,5 +1,5 @@
 "use client";
-import { createBrowserRouter, redirect, replace } from "react-router";
+import { createBrowserRouter } from "react-router";
 
 import Register from "../Auth/Register";
 import HomeLayout from "../Auth/HomeLayout";
@@ -45,7 +45,7 @@ export function AuthProtectedRoute() {
         {},
         { withCredentials: true },
       );
-      console.log(response);
+      // console.log(response);
       auth?.setCurrentUser(response.data);
     } catch (err) {
       console.log(err);

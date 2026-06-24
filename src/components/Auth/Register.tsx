@@ -1,10 +1,11 @@
-import { Box, TextField, Button, Paper,IconButton } from "@mui/material";
+import { Box, TextField, Button,IconButton } from "@mui/material";
 import { type register } from "../../types";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from "react-router";
+import ProfileIcon from "../../../public/assets/User Profile copy.png"
 import {
   Accordion,
   AccordionSummary,
@@ -93,32 +94,55 @@ const action = (
     </ >
   );
   return (
-    <Paper
-      elevation={20}
+    <Box 
       sx={{
         display: "flex",
-        justifyContent:"flex-start",
-        mt: 5,
-        px: 20,
-        py:5,
-        width: "600px",
-        height: "600px",
-        ml: 35,
-        flexDirection:"column",
-        gap:3
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "90vh",
+        width: "100vw",
+        backgroundColor: "#f0f6fb",
       }}
     >
-      <Snackbar
+      <Box sx={{
+        display: "flex",
+          justifyContent: "flex-start",
+          flexDirection: "column",
+          gap: 3, 
+          p: 5,
+          borderRadius: 5,
+          bgcolor: "#ffffff",
+      }}>
+        <Snackbar
         open={flag}
         autoHideDuration={3000} 
         message={snack}
         action={action}
         onClose={()=>setFlag(false)}
       />
-        <Box>
-          <Typography variant="h3" sx={{ fontFamily: "cursive",ml:7 }}>
+
+        <Box sx={{display:"flex",justifyContent:"center",flexDirection:"column"}}>
+        <IconButton sx={{
+        '&:hover': {
+          backgroundColor: 'transparent'
+        }
+      }}>
+            <Box
+              component="img"
+              src={ProfileIcon}
+              alt="3D Home Icon"
+              sx={{
+                width: 40,
+                height: 40,
+              }}
+            />
+          </IconButton> 
+       <Box sx={{display:"flex",justifyContent:"center"}}>
+         <Typography variant="h5">
           Welcome to  Registration
         </Typography>
+       </Box>
         </Box>
         <Box sx={{display:"flex",flexDirection:"column",gap:3}}>
           <TextField 
@@ -158,12 +182,7 @@ const action = (
           onChange={handleChange}
           name="password"
         />
-        <Box sx={{display:"flex",justifyContent:"end"}}>
-         <Button sx={{height:5}} onClick={()=>navigate('/login')}>
-           <Typography>click here to Login</Typography>
-
-          </Button>
-        </Box>
+        
         </Box>
         <Box >
           <Accordion sx={{border:"0.5px solid black",boxShadow:"none"}}>
@@ -184,16 +203,29 @@ const action = (
           </Accordion>
           
         </Box>
-        <Box sx={{pb:10}}>
-          <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{  color: "white", bgcolor: "black",width:"100%",fontFamily:"cursive",fontSize:20 }}
-        >
-          Register
-        </Button>
-        </Box>
+         <Button
+            onClick={handleSubmit}
+            variant="contained"
+            sx={{
+              bgcolor: "#17313E",
+              width: "100%",
+              fontSize: 20,
+              textTransform:"none"
+            }}
+          >
+            <Typography variant="body1" color="initial">Register</Typography>
+          </Button> 
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Typography sx={{fontWeight:200}}>Already have an account ?</Typography>
+            <Button
+              sx={{ height: 5, textTransform: "none" }}
+              onClick={() => navigate("/login")}
+            >
+              <Typography sx={{ mt: 1.5 }}>Login</Typography>
+            </Button>
+          </Box>
+      </Box>
       
-    </Paper>
+    </Box>
   );
 }

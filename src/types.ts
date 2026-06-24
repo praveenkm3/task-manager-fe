@@ -6,3 +6,4 @@ export interface register{
     email?:string,
     adminSecretKey?:number
 } 
+ 

@@ -167,9 +167,9 @@ if(currentUser?.role==='user'){
           <Typography
             noWrap
             component="div"
-            sx={{ fontFamily: "cursive", fontWeight: 500, fontSize: 33 }}
+            sx={{ fontWeight: 500, fontSize: 22,color:"#003049" }}
           >
-            Task Manager
+            Jira Work Management
           </Typography>
         </Toolbar>
       </AppBar>

@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { Button, IconButton } from "@mui/material";
+import { Button, FormLabel, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -94,7 +94,15 @@ export default function Addtask() {
       assigned_user_id: undefined,
     });
   }
+function handleClear(){
+  setPersonName("");
+  setTaskData({
+      title: "",
+      description: "",
+      assigned_user_id: undefined,
+    });
 
+}
 const action = (
     < >
        
@@ -109,63 +117,76 @@ const action = (
     </ >
   );
   return (
-    <Box
+    <Box sx={{display:"flex",justifyContent:"center",alignItems:"center",width:"100%",height:"70vh"}}>
+      <Box
       component="form"
       sx={{
         "& > :not(style)": { m: 1, width: "70ch" },
         display: "flex",
-        flexDirection: "column",
-        gap: 3,
+        flexDirection: "column"
       }}
       noValidate
       autoComplete="off"
     >
-      <TextField
-        id="filled-basic"
-        label="Title"
-        variant="filled"
+      
+        <FormLabel htmlFor="title" sx={{fontWeight:700,fontSize:"20px",color:"black"}}>
+        <Typography variant="h5" color="initial">Task Title</Typography>
+        </FormLabel>
+        <TextField
+        id="title"
+        variant="outlined"
         placeholder="Enter Task Title"
         name="title"
         value={taskData?.title}
         onChange={handleTask}
-      />
+        sx={{width:"100%"}}
+      /> 
+      <FormLabel htmlFor="description" sx={{fontWeight:700,fontSize:"20px",color:"black"}}>
+        <Typography variant="h5" color="initial">Description</Typography>
+        </FormLabel>
       <TextField
-        id="filled-multiline-static"
-        label="Description"
+        id="description" 
         name="description"
         value={taskData?.description}
         multiline
         rows={5}
-        variant="filled"
+        variant="outlined"
         placeholder="Enter Task Description"
         onChange={handleTask}
       />
-      <FormControl fullWidth variant="filled">
-        <InputLabel size="medium" id="demo-multiple-checkbox-label">
-          Select Users
+      <FormLabel htmlFor="selectUser" sx={{fontWeight:700,fontSize:"20px",color:"black"}}>
+        <Typography variant="h5" color="initial">Select User</Typography>
+        </FormLabel>
+      <FormControl fullWidth variant="outlined">
+        <InputLabel size="medium" id="selectUser">
+          Pick User From Here
         </InputLabel>
-        <Select 
-          labelId="demo-multiple-checkbox-label"
-          id="demo-multiple-checkbox"
+        <Select  
+          id="selectUser"
           value={personName}
           onChange={handleChange}
           MenuProps={MenuProps}
-          label="Select Users"
-          
+          label="Pick User From Here" 
         >
           {users?.map((user) => {
             return (
-              <MenuItem key={user.email} value={user.userId}>
-                <Avatar sx={{mx:4}}>{user.email[0].toUpperCase()}</Avatar>
+              <MenuItem key={user.email} value={user.userId} sx={{height:"56px"}}  >
+                <Box sx={{display:"flex",flexDirection:"row"}}>
+                  <Avatar sx={{mr:2}}>{user.email[0].toUpperCase()}</Avatar>
                 <ListItemText primary={user.email} />
+                </Box>
                 
               </MenuItem>
             );
           })}
         </Select>
       </FormControl>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Button variant="contained" sx={{ px: 10 }} onClick={handleSumbit}>
+      <Box sx={{ display: "flex", justifyContent: "end",gap:5 }}>
+        
+        <Button variant="outlined" sx={{ px: 4,color:"#003049"}} onClick={handleClear} >
+          Clear
+        </Button>
+        <Button variant="contained" sx={{ px: 6,color:"white",bgcolor:"#003049"  }} onClick={handleSumbit}>
           Assign Task
         </Button>
       </Box>
@@ -179,5 +200,9 @@ const action = (
         />
       </Box>
     </Box>
+    </Box>
   );
 }
+
+
+ 
