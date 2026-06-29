@@ -1,10 +1,10 @@
 import './App.css'
-import Dashboard from './components/Dashboard'
+import Tasks from './components/InnerComponents/Tasks'
 
 function App() { 
   return (
     <> 
-    <Dashboard />
+    <Tasks />
     </>
   )
 }

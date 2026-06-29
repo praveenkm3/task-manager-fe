@@ -15,7 +15,7 @@ import Sidebar from "../Sidebar";
 import Profile from "../InnerComponents/Profile";
 import Tasks from "../InnerComponents/Tasks";
 import Calender from "../InnerComponents/Calender";
-import Reports from "../InnerComponents/reports";
+import Reports from "../InnerComponents/Reports";
 import Addtask from "../InnerComponents/AddTask";
 import SpecificTask from "../InnerComponents/SpecificTask";
 

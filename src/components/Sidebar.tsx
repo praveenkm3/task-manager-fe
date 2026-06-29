@@ -23,15 +23,15 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import DashboardIcon from "@mui/icons-material/Dashboard"; 
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Link } from "react-router";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { UseAuth } from "../contexts/AuthContext";
-import AddTaskIcon from '@mui/icons-material/AddTask';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import jiraSvg from "../../public/assets/jira copy.svg";
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -117,19 +117,23 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function Sidebar({ children }) {
-
-const {currentUser}=UseAuth();
-let array = [
-  { text: "Profile", path: "/profile", icon: <AccountCircleIcon /> },
-  { text: "Tasks", path: "/tasks", icon: <AssignmentIcon /> },
-  { text: "Calander", path: "/calender", icon: <CalendarMonthIcon /> },
-  { text: "reports", path: "/reports", icon: <DashboardIcon /> },
-  { text: "Add Task", path: "/addtask", icon: <AddTaskIcon /> ,role:'admin'},
-  { text: "Log Out", path: "/logout", icon: <ExitToAppIcon /> },
-];
-if(currentUser?.role==='user'){
-  array=array.filter((item)=>!item?.role)
-}
+  const { currentUser } = UseAuth();
+  let array = [
+    { text: "PROFILE", path: "/profile", icon: <AccountCircleIcon /> },
+    { text: "TASKS", path: "/tasks", icon: <AssignmentIcon /> },
+    { text: "CALANDER", path: "/calender", icon: <CalendarMonthIcon /> },
+    { text: "REPORTS", path: "/reports", icon: <DashboardIcon /> },
+    {
+      text: "ADD TASK",
+      path: "/addtask",
+      icon: <AddTaskIcon />,
+      role: "admin",
+    },
+    { text: "LOG OUT", path: "/logout", icon: <ExitToAppIcon /> },
+  ];
+  if (currentUser?.role === "user") {
+    array = array.filter((item) => !item?.role);
+  }
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -164,13 +168,25 @@ if(currentUser?.role==='user'){
           >
             <MenuIcon />
           </IconButton>
+          <Box sx={{display:"flex"}}>
+            <Box
+              component="img"
+              src={jiraSvg}
+              alt="3D Home Icon"
+              sx={{
+                width: 40,
+                height: 40,
+              }}
+            />
           <Typography
             noWrap
             component="div"
-            sx={{ fontWeight: 500, fontSize: 22,color:"#003049" }}
+            sx={{ fontWeight: 500, fontSize: 22, color: "#003049",mt:0.3 }}
           >
-            Jira Work Management
+             
+             Jira Work Management
           </Typography>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
@@ -188,7 +204,7 @@ if(currentUser?.role==='user'){
           {/* {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => ( */}
           {array.map((item, index) => (
             <Link
-            key={index}
+              key={index}
               to={item.path}
               style={{ textDecoration: "none", color: "black" }}
             >
@@ -217,6 +233,7 @@ if(currentUser?.role==='user'){
                       {
                         minWidth: 0,
                         justifyContent: "center",
+                        color: "#003049",
                       },
                       open
                         ? {
@@ -232,17 +249,19 @@ if(currentUser?.role==='user'){
                   </ListItemIcon>
 
                   <ListItemText
-                    primary={item.text}
                     sx={[
                       open
                         ? {
                             opacity: 1,
+                            color: "#003049",
                           }
                         : {
                             opacity: 0,
                           },
                     ]}
-                  />
+                  >
+                    <Typography sx={{fontWeight:700,fontSize:"13px"}}>{item.text}</Typography>
+                  </ListItemText>
                 </ListItemButton>
               </ListItem>
             </Link>

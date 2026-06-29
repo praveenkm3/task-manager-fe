@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { Button, FormLabel, IconButton, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -11,8 +11,8 @@ import axios from "axios";
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 import Avatar from '@mui/material/Avatar';
-
-
+import {type eventType,type taskDataType,type userDataType } from "../../types";
+import {type SelectChangeEvent } from "@mui/material/Select";
 
 
 
@@ -33,13 +33,13 @@ export default function Addtask() {
   const [personName, setPersonName] = useState("");
   const [message, setMessage] = useState("");
   const [flag,setFlag]=useState(false);
-  const [taskData, setTaskData] = useState({
+  const [taskData, setTaskData] = useState<taskDataType>({
     title: "",
     description: "",
     assigned_user_id: undefined,
   });
 
-  const [users, setUsers] = useState(null);
+  const [users, setUsers] = useState<userDataType[] | null >(null);
   useEffect(() => {
     async function fetchUsers() {
       const response = await axios.get(
@@ -50,11 +50,11 @@ export default function Addtask() {
     }
     fetchUsers();
   }, []);
-  const handleTask = (event) => {
+  const handleTask = (event:eventType) => {
     const { name, value } = event.target;
     setTaskData((prev) => ({ ...prev, [name]: value }));
   };
-  const handleChange = (event) => {
+  const handleChange = (event: SelectChangeEvent<string>) => {
     const { value } = event.target;
     setPersonName(value);
     setTaskData((prev) => ({ ...prev, assigned_user_id: value }));
@@ -84,7 +84,7 @@ export default function Addtask() {
       }
       //   console.log(response);
     } catch (error) {
-      console.log(error?.message);
+      console.log(error);
     }
 
     setPersonName("");
@@ -168,11 +168,11 @@ const action = (
           MenuProps={MenuProps}
           label="Pick User From Here" 
         >
-          {users?.map((user) => {
+          {users?.map((user:userDataType) => {
             return (
               <MenuItem key={user.email} value={user.userId} sx={{height:"56px"}}  >
                 <Box sx={{display:"flex",flexDirection:"row"}}>
-                  <Avatar sx={{mr:2}}>{user.email[0].toUpperCase()}</Avatar>
+                  <Avatar sx={{mr:2}}>{user?.email[0].toUpperCase()}</Avatar>
                 <ListItemText primary={user.email} />
                 </Box>
                 
@@ -183,7 +183,7 @@ const action = (
       </FormControl>
       <Box sx={{ display: "flex", justifyContent: "end",gap:5 }}>
         
-        <Button variant="outlined" sx={{ px: 4,color:"#003049"}} onClick={handleClear} >
+        <Button variant="outlined" sx={{ px: 4,color:"#'&:hover': { backgroundColor: 'transparent' }"}} onClick={handleClear} >
           Clear
         </Button>
         <Button variant="contained" sx={{ px: 6,color:"white",bgcolor:"#003049"  }} onClick={handleSumbit}>

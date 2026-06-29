@@ -1,7 +1,10 @@
-import { UseAuth } from "../../contexts/AuthContext"
+import { UseAuth } from "../../contexts/AuthContext";
+
+
+
 export default function Profile(){
 const{currentUser}=UseAuth();
     return(
-        <h1>Welcmoe {currentUser.email}</h1>
+        <h1>Welcome {currentUser.email}</h1>
     )
 }

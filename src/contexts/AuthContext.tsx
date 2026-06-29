@@ -1,10 +1,12 @@
-import { useState,createContext,useContext } from "react";
+import { useState,createContext,useContext} from "react";
+import { type childProviderProps,type CurrentuserType,type UserContextType } from "../types";
+
+export const AuthContext=createContext<UserContextType | null>(null);
 
 
-export const AuthContext=createContext(null);
-
-export default function AuthProvider({children}){
-    const[currentUser,setCurrentUser]=useState(null);
+export default function AuthProvider({children}:childProviderProps){
+    // const[currentUser,setCurrentUser]=useState(null);
+    const[currentUser,setCurrentUser]=useState<null | CurrentuserType>(null)
      
     function removeUser():void{
         setCurrentUser(null);
