@@ -1,11 +1,17 @@
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
-import { Chip, TextField } from "@mui/material";
+import { Chip, Typography, TextField, Box } from "@mui/material";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { UseAuth } from "../../contexts/AuthContext";
-
 import axios from "axios";
 import { Link } from "react-router";
+import highPriorityIcon from "../../../public/assets/highPriority.png"
+import equalIcon from "../../../public/assets/equal.svg";
+import down from "../../../public/assets/down.png";
+ 
+
+
+
 const ILikeInput = (props) => {
   const { item, applyValue } = props; //data and setter function
   // console.log(item);
@@ -32,43 +38,64 @@ export default function DisplayTasks() {
     {
       field: "tasks_title",
       headerName: "Task Title",
-      minWidth: 350,
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Title
+          </Typography>
+        );
+      },
+      minWidth: 250,
       filterOperators: [ilikeOperator],
     },
     {
       field: "tasks_description",
       headerName: "Description",
-      minWidth: 450,
-      filterOperators: [ilikeOperator]
+      minWidth: 350,
+      filterOperators: [ilikeOperator],
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Description
+          </Typography>
+        );
+      },
     },
     {
       field: "tasks_status",
       headerName: "Status",
-      width: 200,
+      width: 150,
       filterOperators: [ilikeOperator],
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Status
+          </Typography>
+        );
+      },
       renderCell(params) {
-        const tasks_status = params.row.tasks_status;
+        const tasks_status = params?.row?.tasks_status;
         return (
           <Chip
             sx={{
               fontWeight: 700,
-              fontSize: "13px",
-              borderRadius: 10,
-              width: 140,
+              fontSize: "10px",
+              borderRadius: 1,
+              width: 100,
               bgcolor:
                 tasks_status === "In Progress"
-                  ? "#ebedf0"
+                  ? "#98baee34"
                   : tasks_status === "TO DO"
-                  ? "#ebedf0"
+                  ? "#7a7b7e29"
                   : tasks_status === "Completed"
                   ? "#bed1b769"
-                  : "#ebedf0",
+                  : "#f9adad1d",
 
               color:
                 tasks_status === "TO DO"
-                  ? "#4d4a4a"
+                  ? "#2a2929"
                   : tasks_status === "pending"
-                  ? "#fc9a9a"
+                  ? "#f66868"
                   : tasks_status === "In Progress"
                   ? "#1591DC"
                   : "green",
@@ -81,18 +108,82 @@ export default function DisplayTasks() {
     {
       field: "admins_email",
       headerName: "Admin Email",
+      minWidth: 150,
+      filterOperators: [ilikeOperator],
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Admin Email
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "tasks_dueDate",
+      headerName: "Due Date",
+      minWidth: 100,
+      filterOperators: [ilikeOperator],
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Due Date
+          </Typography>
+        );
+      },
+      renderCell(params) {
+        const date = params?.row.tasks_dueDate.split("T")[0];
+        return date;
+      },
+    },
+    {
+      field: "tasks_priority",
+      headerName: "Priority",
       minWidth: 220,
       filterOperators: [ilikeOperator],
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Priority
+          </Typography>
+        );
+      },
+      renderCell(params) {
+        const priority = params?.row?.tasks_priority;
+        // console.log(priority);
+        return (
+          <>
+            <Box sx={{display:"flex",gap:1,mt:2}}>
+              <Box
+              component="img"
+              src={
+                priority ==='High' ? highPriorityIcon :
+                priority ==='Medium' ? equalIcon :
+                down
+              }
+              alt="3D Home Icon"
+              sx={{
+                width: 20,
+                height: 20,
+                backgroundColor: 'transparent'
+              }}
+            />
+            <Box>
+              <Typography>{priority}</Typography>
+            </Box>
+            </Box>
+          </>
+        );
+      },
     },
     {
       field: "tasks_taskId",
-      headerName: "View Task",
+      headerName: "",
       minWidth: 100,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
       renderCell: (params) => {
-        const taskId = params.row.tasks_taskId; 
+        const taskId = params.row.tasks_taskId;
         return (
           <Link to={`/task/${taskId}`}>
             <RemoveRedEyeIcon sx={{ color: "#4d4a4a", height: 20 }} />
@@ -107,6 +198,13 @@ export default function DisplayTasks() {
       field: "users_email",
       headerName: "Assignee",
       minWidth: 220,
+      renderHeader() {
+        return (
+          <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
+            Assignee
+          </Typography>
+        );
+      },
       filterOperators: [ilikeOperator],
     };
   }
@@ -114,6 +212,7 @@ export default function DisplayTasks() {
   const [records, setRecords] = useState(15);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  console.log(rows);
   //sort
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("");

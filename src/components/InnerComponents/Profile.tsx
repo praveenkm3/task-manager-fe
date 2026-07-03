@@ -63,7 +63,7 @@ export default function Profile() {
             {currentUser?.email[0].toUpperCase()}
           </Avatar>
           <Box>
-            <Typography sx={{ mt: 1 ,fontWeight:700}}>
+            <Typography sx={{ mt: 1.5 ,fontWeight:700,fontSize:"13px"}}>
               {currentUser.email.toUpperCase()}
             </Typography>
           </Box>
