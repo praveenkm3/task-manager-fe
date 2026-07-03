@@ -1,30 +1,24 @@
-"use client";
+// "use client";
 import { createBrowserRouter } from "react-router";
-
 import Register from "../Auth/Register";
 import HomeLayout from "../Auth/HomeLayout";
 import App from "../../App";
 import Login from "../Auth/Login";
 import Logout from "../Auth/Logout";
-import { UseAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router";
+import { UseAuth } from "../../contexts/AuthContext"; 
 import { Outlet, Navigate } from "react-router";
-import axios from "axios";
-import { useEffect } from "react";
 import Sidebar from "../Sidebar";
 import Profile from "../InnerComponents/Profile";
-import Tasks from "../InnerComponents/Tasks";
+// import Tasks from "../InnerComponents/Tasks";
 import Calender from "../InnerComponents/Calender";
 import Reports from "../InnerComponents/Reports";
 import Addtask from "../InnerComponents/AddTask";
 import SpecificTask from "../InnerComponents/SpecificTask";
-
-
+import DisplyTasks from "../InnerComponents/DisplayTasks";
 
 
 export function ProtectedRoute() {
-  const navigate = useNavigate();
-  const { currentUser,removeUser } = UseAuth();
+  const { currentUser, removeUser } = UseAuth();
   if (!currentUser) {
     removeUser();
     return <Navigate to="/login" replace />;
@@ -36,26 +30,9 @@ export function ProtectedRoute() {
     );
   }
 }
-export function AuthProtectedRoute() {
-  const auth = UseAuth();
-  async function makeRefresh() {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/refresh",
-        {},
-        { withCredentials: true },
-      );
-      // console.log(response);
-      auth?.setCurrentUser(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  useEffect(() => {
-    makeRefresh();
-  }, []);
-
+export function AuthProtectedRoute() { 
   const { currentUser } = UseAuth();
+
   if (currentUser) {
     return <Navigate to="/main" replace />;
   } else {
@@ -64,6 +41,10 @@ export function AuthProtectedRoute() {
 }
 
 export const router = createBrowserRouter([
+  {
+    path: "/logout",
+    Component: Logout,
+  },
   {
     element: <AuthProtectedRoute />,
     children: [
@@ -83,7 +64,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-
   {
     Component: ProtectedRoute,
     children: [
@@ -101,24 +81,20 @@ export const router = createBrowserRouter([
       },
       {
         path: "/tasks",
-        Component: Tasks,
+        Component: DisplyTasks,
       },
       {
         path: "/profile",
         Component: Profile,
       },
       {
-        path: "/logout",
-        Component: Logout,
+        path: "/addtask",
+        Component: Addtask,
       },
       {
-        path:'/addtask',
-        Component:Addtask
+        path: "/task/:id",
+        Component: SpecificTask,
       },
-      {
-        path:"/task/:id",
-        Component:SpecificTask
-      }
     ],
   },
 ]);

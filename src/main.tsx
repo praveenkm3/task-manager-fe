@@ -8,11 +8,11 @@ axios.interceptors.response.use(
   (response) => response, 
   async (error) => {
     const originalRequest = error.config;
-    console.log(originalRequest);
+    // console.log(originalRequest);
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const url = originalRequest.url;
-      console.log(url);
+      // console.log(url);
     // Skip refresh logic if the failed request(to prevent from repeated requests)
     if (url.includes('/api/refresh') ) {
       return Promise.reject(error);

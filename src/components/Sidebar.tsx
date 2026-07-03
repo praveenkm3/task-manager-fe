@@ -121,7 +121,7 @@ export default function Sidebar({ children }) {
   let array = [
     { text: "PROFILE", path: "/profile", icon: <AccountCircleIcon /> },
     { text: "TASKS", path: "/tasks", icon: <AssignmentIcon /> },
-    { text: "CALANDER", path: "/calender", icon: <CalendarMonthIcon /> },
+    { text: "CALENDER", path: "/calender", icon: <CalendarMonthIcon /> },
     { text: "REPORTS", path: "/reports", icon: <DashboardIcon /> },
     {
       text: "ADD TASK",

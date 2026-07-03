@@ -60,7 +60,7 @@ export default function SpecificTask() {
   useEffect(() => {
     async function getOneTask() {
       const response = await axios.get(
-        `http://localhost:5000/${currentUser.role}/fetch-tasks/${taskId}`,
+        `http://localhost:5000/${currentUser.role}/fetch-specific-task/${taskId}`,
         { withCredentials: true },
       );
       setData(response.data[0]);
@@ -120,7 +120,9 @@ export default function SpecificTask() {
       );
       setUsers(response.data);
     }
-    fetchUsers();
+    if(currentUser.role==='admin'){
+      fetchUsers();
+    }
   }, []);
   const [edit, setEdit] = useState<boolean>(false);
   function handleEdit() {

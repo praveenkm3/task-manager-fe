@@ -7,7 +7,9 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 
 export default function DateCalendarValue() {
   const [value, setValue] = React.useState<Dayjs | null>(null);
-    // console.log(value);
+    if(value){
+      console.log(value['$d']);
+    }
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DemoContainer components={['DateCalendar', 'DateCalendar']}> 
