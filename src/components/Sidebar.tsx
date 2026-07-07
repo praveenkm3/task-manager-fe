@@ -32,6 +32,11 @@ import { UseAuth } from "../contexts/AuthContext";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import jiraSvg from "../../public/assets/jira copy.svg";
+import axios from "axios";
+import { useNavigate } from "react-router";
+
+
+
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -117,7 +122,23 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function Sidebar({ children }) {
-  const { currentUser } = UseAuth();
+  const navigate = useNavigate();
+const { currentUser, removeUser } = UseAuth();
+
+const handleLogout = async () => {
+  try {
+    await axios.post(
+      "http://localhost:5000/api/logout",
+      {},
+      { withCredentials: true }
+    );
+  } catch (err) {
+    console.error(err);
+  } finally {
+    removeUser();
+    navigate("/login", { replace: true });
+  }
+};
   let array = [
     { text: "PROFILE", path: "/profile", icon: <AccountCircleIcon /> },
     { text: "TASKS", path: "/tasks", icon: <AssignmentIcon /> },
@@ -128,8 +149,7 @@ export default function Sidebar({ children }) {
       path: "/addtask",
       icon: <AddTaskIcon />,
       role: "admin",
-    },
-    { text: "LOG OUT", path: "/logout", icon: <ExitToAppIcon /> },
+    }
   ];
   if (currentUser?.role === "user") {
     array = array.filter((item) => !item?.role);
@@ -266,6 +286,36 @@ export default function Sidebar({ children }) {
               </ListItem>
             </Link>
           ))}
+          <ListItem disablePadding sx={{ display: "block" }}>
+  <ListItemButton
+    onClick={handleLogout}
+    sx={{
+      minHeight: 48,
+      px: 2.5,
+      justifyContent: open ? "initial" : "center",
+    }}
+  >
+    <ListItemIcon
+      sx={{
+        minWidth: 0,
+        justifyContent: "center",
+        color: "#003049",
+        mr: open ? 3 : "auto",
+      }}
+    >
+      <ExitToAppIcon />
+    </ListItemIcon>
+
+    <ListItemText
+      primary={
+        <Typography sx={{ fontWeight: 700, fontSize: "13px" }}>
+          LOG OUT
+        </Typography>
+      }
+      sx={{ opacity: open ? 1 : 0, color: "#003049" }}
+    />
+  </ListItemButton>
+</ListItem>
         </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

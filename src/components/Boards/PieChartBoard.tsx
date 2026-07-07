@@ -35,9 +35,9 @@ export default function PieChartBoard({tasks}) {
             ],
           },
         ]}
-        width={300}
+        width={200}
         height={200}
-        sx={{p:5}}
+        sx={{px:5,py:6}}
       />
     </Box>
   );

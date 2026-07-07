@@ -5,12 +5,14 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { UseAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { Link } from "react-router";
-import highPriorityIcon from "../../../public/assets/highPriority.png"
+import highPriorityIcon from "../../../public/assets/highPriority.png";
 import equalIcon from "../../../public/assets/equal.svg";
 import down from "../../../public/assets/down.png";
- 
-
-
+import * as React from "react";
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const ILikeInput = (props) => {
   const { item, applyValue } = props; //data and setter function
@@ -31,6 +33,51 @@ const ilikeOperator = {
   value: "ilike",
   getApplyFilterFn: () => null, //it's off default mui builtin sort
   InputComponent: ILikeInput,
+};
+
+
+const BetweenInput = (props) => {
+  const { item, applyValue } = props;
+  const [startDate, setStartDate] = React.useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = React.useState<Dayjs | null>(null);
+
+  const handleStartDateChange = (newValue: Dayjs | null) => {
+    setStartDate(newValue);
+    if (applyValue) { 
+      applyValue({ ...item, value: [newValue, endDate] });
+    }
+  };
+
+  const handleEndDateChange = (newValue: Dayjs | null) => {
+    setEndDate(newValue);
+    if (applyValue) { 
+      applyValue({ ...item, value: [startDate, newValue] });
+    }
+  };
+
+  return ( 
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <DatePicker
+          label="Start Date"
+          value={startDate}
+          onChange={handleStartDateChange}
+        />
+        <DatePicker
+          label="End Date"
+          value={endDate}
+          onChange={handleEndDateChange}
+        />
+      </Box>
+    </LocalizationProvider>
+  );
+};
+
+const betweenOperator = {
+  label: "Between",
+  value: "between",
+  getApplyFilterFn: () => null, //it's off default mui builtin sort
+  InputComponent: BetweenInput,
 };
 
 export default function DisplayTasks() {
@@ -121,8 +168,10 @@ export default function DisplayTasks() {
     {
       field: "tasks_dueDate",
       headerName: "Due Date",
-      minWidth: 100,
-      filterOperators: [ilikeOperator],
+      minWidth: 130,
+      type: "date",
+      valueGetter: (value) => (value ? new Date(value) : null),
+      filterOperators: [betweenOperator],
       renderHeader() {
         return (
           <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
@@ -130,15 +179,11 @@ export default function DisplayTasks() {
           </Typography>
         );
       },
-      renderCell(params) {
-        const date = params?.row.tasks_dueDate.split("T")[0];
-        return date;
-      },
     },
     {
       field: "tasks_priority",
       headerName: "Priority",
-      minWidth: 220,
+      minWidth: 150,
       filterOperators: [ilikeOperator],
       renderHeader() {
         return (
@@ -152,24 +197,26 @@ export default function DisplayTasks() {
         // console.log(priority);
         return (
           <>
-            <Box sx={{display:"flex",gap:1,mt:2}}>
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
               <Box
-              component="img"
-              src={
-                priority ==='High' ? highPriorityIcon :
-                priority ==='Medium' ? equalIcon :
-                down
-              }
-              alt="3D Home Icon"
-              sx={{
-                width: 20,
-                height: 20,
-                backgroundColor: 'transparent'
-              }}
-            />
-            <Box>
-              <Typography>{priority}</Typography>
-            </Box>
+                component="img"
+                src={
+                  priority === "High"
+                    ? highPriorityIcon
+                    : priority === "Medium"
+                    ? equalIcon
+                    : down
+                }
+                alt="3D Home Icon"
+                sx={{
+                  width: 20,
+                  height: 20,
+                  backgroundColor: "transparent",
+                }}
+              />
+              <Box>
+                <Typography>{priority}</Typography>
+              </Box>
             </Box>
           </>
         );
@@ -178,7 +225,7 @@ export default function DisplayTasks() {
     {
       field: "tasks_taskId",
       headerName: "",
-      minWidth: 100,
+      minWidth: 200,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
@@ -197,7 +244,7 @@ export default function DisplayTasks() {
     columns[3] = {
       field: "users_email",
       headerName: "Assignee",
-      minWidth: 220,
+      minWidth: 180,
       renderHeader() {
         return (
           <Typography sx={{ fontWeight: 700, fontSize: 15, color: "black" }}>
@@ -212,40 +259,13 @@ export default function DisplayTasks() {
   const [records, setRecords] = useState(15);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  console.log(rows);
   //sort
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("");
-  //   useEffect(() => {
-  //     async function getLength() {
-  //       const response2 = await axios.get(
-  //         `http://localhost:5000/user/fetch-tasks-length`,
-  //         { withCredentials: true },
-  //       );
-  //       setTotal(response2.data?.length);
-  //     }
-  //     getLength();
-  //   }, []);
+  //filter
   const [filterColumn, setFilterColumn] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [filterOperator, setFilterOperator] = useState("");
-  //   useEffect(() => {
-  //     async function runner() {
-  //       const response = await axios.post(
-  //         `http://localhost:5000/user/fetch-tasks`,
-  //         {
-  //           records: records,
-  //           page: page,
-  //           sortColumnName: sortColumn,
-  //           sordOrder: sortOrder
-  //         },
-  //         { withCredentials: true },
-  //       );
-  //         setRows(response.data?.result);
-  //         setTotal(response?.data?.length)
-  //     }
-  //     runner();
-  //   }, [page,records,sortColumn, sortOrder]);
 
   function handleSortChange(event) {
     const colName = event[0]?.field;
@@ -257,11 +277,14 @@ export default function DisplayTasks() {
     setPage(event?.page + 1);
   }
   function handleFilterChange(event) {
-    const { field = "", operator = "", value = "" } = event?.items[0];
-    setFilterColumn(field);
-    setFilterValue(value);
-    setFilterOperator(operator);
-    // console.log(event?.items[0]);
+    try {
+      const { field = "", operator = "", value = "" } = event?.items[0];
+      setFilterColumn(field);
+      setFilterValue(value);
+      setFilterOperator(operator);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
@@ -275,7 +298,9 @@ export default function DisplayTasks() {
                 page: page,
                 records: records,
                 filterColumn: filterValue ? filterColumn : undefined,
-                filterValue: filterValue || undefined,
+                filterValue: Array.isArray(filterValue) ?
+                filterValue[0] && filterValue[1] ? filterValue : undefined : filterValue || undefined,
+                // filterValue: filterValue.length && (filterValue[0].length > 0 && filterValue[1].length > 0) ? filterValue || undefined : filterValue,
                 filterOperator: filterValue ? filterOperator : undefined,
                 sortColumnName: sortColumn || undefined,
                 sortOrder: sortOrder || undefined,
@@ -290,7 +315,7 @@ export default function DisplayTasks() {
         }
         runFilter();
       },
-      filterValue ? 600 : 0,
+      filterValue ? 900 : 0,
     );
     return () => clearTimeout(timer);
   }, [
@@ -311,15 +336,24 @@ export default function DisplayTasks() {
         columns={columns}
         sortingMode="server"
         getRowId={(row) => row.tasks_taskId}
-        key={rows}
         onSortModelChange={handleSortChange}
         onPaginationModelChange={handlePageChange}
         paginationModel={{ page: page - 1, pageSize: records }}
         paginationMode="server"
-        pageSizeOptions={[1, 10, 15, 50, 100]}
+        pageSizeOptions={[1, 15, 50, 100]}
         rowCount={total}
         filterMode="server"
         onFilterModelChange={handleFilterChange}
+        slotProps={{
+          filterPanel: {
+            disableAddFilterButton: true,
+            filterFormProps: {
+              operatorInputProps: {
+                sx: { display: "none" },
+              },
+            },
+          },
+        }}
       />
     </>
   );

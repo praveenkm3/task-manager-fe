@@ -4,8 +4,8 @@ import Register from "../Auth/Register";
 import HomeLayout from "../Auth/HomeLayout";
 import App from "../../App";
 import Login from "../Auth/Login";
-import Logout from "../Auth/Logout";
-import { UseAuth } from "../../contexts/AuthContext"; 
+// import Logout from "../Auth/Logout";
+import { UseAuth } from "../../contexts/AuthContext";
 import { Outlet, Navigate } from "react-router";
 import Sidebar from "../Sidebar";
 import Profile from "../InnerComponents/Profile";
@@ -15,12 +15,9 @@ import Reports from "../InnerComponents/Reports";
 import Addtask from "../InnerComponents/AddTask";
 import SpecificTask from "../InnerComponents/SpecificTask";
 import DisplyTasks from "../InnerComponents/DisplayTasks";
-
-
 export function ProtectedRoute() {
-  const { currentUser, removeUser } = UseAuth();
+  const { currentUser } = UseAuth();
   if (!currentUser) {
-    removeUser();
     return <Navigate to="/login" replace />;
   } else {
     return (
@@ -30,7 +27,7 @@ export function ProtectedRoute() {
     );
   }
 }
-export function AuthProtectedRoute() { 
+export function AuthProtectedRoute() {
   const { currentUser } = UseAuth();
 
   if (currentUser) {
@@ -42,16 +39,16 @@ export function AuthProtectedRoute() {
 
 export const router = createBrowserRouter([
   {
-    path: "/logout",
-    Component: Logout,
-  },
-  {
     element: <AuthProtectedRoute />,
     children: [
       {
         path: "/",
         Component: HomeLayout,
         children: [
+          {
+            index: true, // Handles the absolute root "/"
+            element: <Navigate to="/login" replace />,
+          },
           {
             path: "/register",
             Component: Register,
@@ -98,3 +95,4 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+

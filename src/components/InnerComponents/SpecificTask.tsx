@@ -10,7 +10,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { Typography, type SelectChangeEvent } from "@mui/material";
-import { type createTaskDataType, type userDataType } from "../../types";
+import { type createTaskDataType, type userDataType } from "../../types"; 
+
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+
 import React from "react";
 import {
   Avatar,
@@ -33,6 +39,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { UseAuth } from "../../contexts/AuthContext";
+import dayjs from "dayjs";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -49,6 +56,8 @@ const MenuProps = {
 
  
 export default function SpecificTask() { 
+  const [dateValue, setDateValue] = useState(dayjs());
+  const [priority, setPriority] = useState("");
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const { currentUser } = UseAuth();
@@ -67,7 +76,12 @@ export default function SpecificTask() {
       console.log(response.data);
     }
     getOneTask();
-  }, [taskId, currentUser.role]);
+  }, [taskId, currentUser.role]); 
+  useEffect(() => {
+  if (data?.priority) {
+    setPriority(data.priority);
+  }
+}, [data]);
   function handleSubmit() {
     if (radio) {
       async function updateTask() {
@@ -123,7 +137,7 @@ export default function SpecificTask() {
     if(currentUser.role==='admin'){
       fetchUsers();
     }
-  }, []);
+  }, [currentUser.role]);
   const [edit, setEdit] = useState<boolean>(false);
   function handleEdit() {
     setEdit(true);
@@ -156,8 +170,8 @@ export default function SpecificTask() {
   }
   function handleAdminSubmit() {
     async function updateTaskByAdmin() {
-      console.log(data);
-      console.log(personName);
+      // console.log(data);
+      // console.log(personName);
       const response = await axios.put(
         "http://localhost:5000/admin/update-task",
         {
@@ -165,6 +179,8 @@ export default function SpecificTask() {
           title: data?.title,
           description: data?.description,
           assigned_user_id: personName,
+          dueDate:dateValue,
+          priority:priority
         },
         { withCredentials: true },
       );
@@ -196,6 +212,7 @@ export default function SpecificTask() {
   const handleClose = () => {
     setOpen(false);
   };
+  
 
   return (
     <>
@@ -258,8 +275,39 @@ export default function SpecificTask() {
             }}
             size="small"
           />
+          
+        <Box>
+          
+        </Box>
           {currentUser.role === "admin" && edit && (
             <>
+            <Box>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={["DesktopDatePicker"]}>
+              <DesktopDatePicker
+                label="Due Date"
+                disabled={!edit}
+                onChange={(newValue) => setDateValue(newValue)}
+                value={dateValue}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+        </Box>
+            <RadioGroup
+  value={priority}
+  onChange={(e) => setPriority(e.target.value)}
+  sx={{display:"flex",flexDirection:"row"}}
+>
+  <FormControlLabel value="Low" control={<Radio />} label="Low"/>
+  <FormControlLabel value="Medium" control={<Radio />} label="Medium" />
+  <FormControlLabel value="High" control={<Radio />} label="High" />
+</RadioGroup>
+
               <FormLabel
                 htmlFor="selectUser"
                 sx={{ fontWeight: 700, fontSize: "20px", color: "black" }}

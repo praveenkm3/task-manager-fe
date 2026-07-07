@@ -4,8 +4,7 @@ import axios from "axios";
 export const AuthContext=createContext<UserContextType | null>(null);
 
 
-export default function AuthProvider({children}:childProviderProps){
-    // const[currentUser,setCurrentUser]=useState(null);
+export default function AuthProvider({children}:childProviderProps){ 
     const[currentUser,setCurrentUser]=useState<null | CurrentuserType>(null)
      
     function removeUser():void{
