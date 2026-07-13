@@ -35,8 +35,6 @@ import jiraSvg from "../../public/assets/jira copy.svg";
 import axios from "axios";
 import { useNavigate } from "react-router";
 
-
-
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -123,22 +121,22 @@ const Drawer = styled(MuiDrawer, {
 
 export default function Sidebar({ children }) {
   const navigate = useNavigate();
-const { currentUser, removeUser } = UseAuth();
+  const { currentUser, removeUser } = UseAuth();
 
-const handleLogout = async () => {
-  try {
-    await axios.post(
-      "http://localhost:5000/api/logout",
-      {},
-      { withCredentials: true }
-    );
-  } catch (err) {
-    console.error(err);
-  } finally {
-    removeUser();
-    navigate("/login", { replace: true });
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        "http://localhost:5000/api/logout",
+        {},
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      removeUser();
+      navigate("/login", { replace: true });
+    }
+  };
   let array = [
     { text: "PROFILE", path: "/profile", icon: <AccountCircleIcon /> },
     { text: "TASKS", path: "/tasks", icon: <AssignmentIcon /> },
@@ -149,7 +147,7 @@ const handleLogout = async () => {
       path: "/addtask",
       icon: <AddTaskIcon />,
       role: "admin",
-    }
+    },
   ];
   if (currentUser?.role === "user") {
     array = array.filter((item) => !item?.role);
@@ -188,7 +186,7 @@ const handleLogout = async () => {
           >
             <MenuIcon />
           </IconButton>
-          <Box sx={{display:"flex"}}>
+          <Box sx={{ display: "flex" }}>
             <Box
               component="img"
               src={jiraSvg}
@@ -198,14 +196,13 @@ const handleLogout = async () => {
                 height: 40,
               }}
             />
-          <Typography
-            noWrap
-            component="div"
-            sx={{ fontWeight: 500, fontSize: 22, color: "#003049",mt:0.3 }}
-          >
-             
-             Jira Work Management
-          </Typography>
+            <Typography
+              noWrap
+              component="div"
+              sx={{ fontWeight: 500, fontSize: 22, color: "#003049", mt: 0.3 }}
+            >
+              Jira Work Management
+            </Typography>
           </Box>
         </Toolbar>
       </AppBar>
@@ -280,42 +277,44 @@ const handleLogout = async () => {
                           },
                     ]}
                   >
-                    <Typography sx={{fontWeight:700,fontSize:"13px"}}>{item.text}</Typography>
+                    <Typography sx={{ fontWeight: 700, fontSize: "13px" }}>
+                      {item.text}
+                    </Typography>
                   </ListItemText>
                 </ListItemButton>
               </ListItem>
             </Link>
           ))}
           <ListItem disablePadding sx={{ display: "block" }}>
-  <ListItemButton
-    onClick={handleLogout}
-    sx={{
-      minHeight: 48,
-      px: 2.5,
-      justifyContent: open ? "initial" : "center",
-    }}
-  >
-    <ListItemIcon
-      sx={{
-        minWidth: 0,
-        justifyContent: "center",
-        color: "#003049",
-        mr: open ? 3 : "auto",
-      }}
-    >
-      <ExitToAppIcon />
-    </ListItemIcon>
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                minHeight: 48,
+                px: 2.5,
+                justifyContent: open ? "initial" : "center",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  justifyContent: "center",
+                  color: "#003049",
+                  mr: open ? 3 : "auto",
+                }}
+              >
+                <ExitToAppIcon />
+              </ListItemIcon>
 
-    <ListItemText
-      primary={
-        <Typography sx={{ fontWeight: 700, fontSize: "13px" }}>
-          LOG OUT
-        </Typography>
-      }
-      sx={{ opacity: open ? 1 : 0, color: "#003049" }}
-    />
-  </ListItemButton>
-</ListItem>
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: 700, fontSize: "13px" }}>
+                    LOG OUT
+                  </Typography>
+                }
+                sx={{ opacity: open ? 1 : 0, color: "#003049" }}
+              />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

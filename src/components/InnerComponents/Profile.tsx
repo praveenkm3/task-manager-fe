@@ -32,12 +32,11 @@ export default function Profile() {
   const groupedData = Object.values(
     profiles.reduce((acc, current) => {
       const email = current.email;
-      console.log(current);
+      // console.log(current);
 
       if (!acc[email]) {
         acc[email] = { user: email, statuses: [] };
       }
-
       acc[email].statuses.push({
         status: current.status,
         totalTasks: parseInt(current.totalTasks),
@@ -46,7 +45,7 @@ export default function Profile() {
       return acc;
     }, {}),
   );
-  console.log(groupedData);
+  // console.log(groupedData);
   return (
     <>
       <Box
@@ -169,14 +168,15 @@ export default function Profile() {
                       </Box>
                     </Box>
                     <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      {current?.statuses?.map((item) => {
+                      {current?.statuses?.map((item,index) => {
                         return (
-                          <>
-                            <Box
+                          <Box key={index}>
+                            <Box 
                               sx={{
                                 display: "flex",
                                 flexDirection: "column",
                                 gap: 2,
+                                
                               }}
                             >
                               <Box sx={{ display: "flex" }}>
@@ -201,7 +201,7 @@ export default function Profile() {
                                 </Badge>
                               </Box>
                             </Box>
-                          </>
+                          </Box>
                         );
                       })}
                     </Box>

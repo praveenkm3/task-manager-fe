@@ -1,4 +1,4 @@
-import Chip from "@mui/material/Chip"; 
+import Chip from "@mui/material/Chip";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -10,7 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { Typography, type SelectChangeEvent } from "@mui/material";
-import { type createTaskDataType, type userDataType } from "../../types"; 
+import { type createTaskDataType, type userDataType } from "../../types";
 
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -54,8 +54,7 @@ const MenuProps = {
   },
 };
 
- 
-export default function SpecificTask() { 
+export default function SpecificTask() {
   const [dateValue, setDateValue] = useState(dayjs());
   const [priority, setPriority] = useState("");
   const navigate = useNavigate();
@@ -76,12 +75,15 @@ export default function SpecificTask() {
       console.log(response.data);
     }
     getOneTask();
-  }, [taskId, currentUser.role]); 
+  }, [taskId, currentUser.role]);
   useEffect(() => {
-  if (data?.priority) {
-    setPriority(data.priority);
-  }
-}, [data]);
+    if (data?.priority) {
+      setPriority(data.priority);
+    }
+    if (data?.dueDate) {
+      setDateValue(dayjs(data?.dueDate?.split('T')[0]));
+    }
+  }, [data]);
   function handleSubmit() {
     if (radio) {
       async function updateTask() {
@@ -134,7 +136,7 @@ export default function SpecificTask() {
       );
       setUsers(response.data);
     }
-    if(currentUser.role==='admin'){
+    if (currentUser.role === "admin") {
       fetchUsers();
     }
   }, [currentUser.role]);
@@ -179,8 +181,8 @@ export default function SpecificTask() {
           title: data?.title,
           description: data?.description,
           assigned_user_id: personName,
-          dueDate:dateValue,
-          priority:priority
+          dueDate: dateValue,
+          priority: priority,
         },
         { withCredentials: true },
       );
@@ -212,7 +214,6 @@ export default function SpecificTask() {
   const handleClose = () => {
     setOpen(false);
   };
-  
 
   return (
     <>
@@ -275,38 +276,44 @@ export default function SpecificTask() {
             }}
             size="small"
           />
-          
-        <Box>
-          
-        </Box>
+
+          <Box></Box>
           {currentUser.role === "admin" && edit && (
             <>
-            <Box>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DemoContainer components={["DesktopDatePicker"]}>
-              <DesktopDatePicker
-                label="Due Date"
-                disabled={!edit}
-                onChange={(newValue) => setDateValue(newValue)}
-                value={dateValue}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </DemoContainer>
-          </LocalizationProvider>
-        </Box>
-            <RadioGroup
-  value={priority}
-  onChange={(e) => setPriority(e.target.value)}
-  sx={{display:"flex",flexDirection:"row"}}
->
-  <FormControlLabel value="Low" control={<Radio />} label="Low"/>
-  <FormControlLabel value="Medium" control={<Radio />} label="Medium" />
-  <FormControlLabel value="High" control={<Radio />} label="High" />
-</RadioGroup>
+              <Box>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer components={["DesktopDatePicker"]}>
+                    <DesktopDatePicker
+                      label="Due Date"
+                      disabled={!edit}
+                      onChange={(newValue) => setDateValue(newValue)}
+                      value={dateValue}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                        },
+                      }}
+                    />
+                  </DemoContainer>
+                </LocalizationProvider>
+              </Box>
+              <RadioGroup
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                sx={{ display: "flex", flexDirection: "row" }}
+              >
+                <FormControlLabel value="Low" control={<Radio />} label="Low" />
+                <FormControlLabel
+                  value="Medium"
+                  control={<Radio />}
+                  label="Medium"
+                />
+                <FormControlLabel
+                  value="High"
+                  control={<Radio />}
+                  label="High"
+                />
+              </RadioGroup>
 
               <FormLabel
                 htmlFor="selectUser"
@@ -351,32 +358,34 @@ export default function SpecificTask() {
           )}
           {currentUser?.role === "user" && (
             <>
-            <FormControl sx={{width:"30%",mt:0}}>
-              <Typography sx={{color:"black",fontSize:"21px",pb:2}}>Change Status</Typography>
-              <RadioGroup 
-                // aria-labelledby={`${id}-label`}
-                defaultValue="TO DO"
-                name="radio-buttons-group"
-                onChange={(event) => setRadio(event.target.value)}
+              <FormControl sx={{ width: "30%", mt: 0 }}>
+                <Typography sx={{ color: "black", fontSize: "21px", pb: 2 }}>
+                  Change Status
+                </Typography>
+                <RadioGroup
+                  // aria-labelledby={`${id}-label`}
+                  defaultValue="TO DO"
+                  name="radio-buttons-group"
+                  onChange={(event) => setRadio(event.target.value)}
                 >
-                <FormControlLabel
-                  value="TO DO"
-                  control={<Radio color="secondary"/>}
-                  label="TO DO" 
+                  <FormControlLabel
+                    value="TO DO"
+                    control={<Radio color="secondary" />}
+                    label="TO DO"
                   />
-                <FormControlLabel
-                  value="Completed"
-                  control={<Radio color="success"/>}
-                  label="Completed"
+                  <FormControlLabel
+                    value="Completed"
+                    control={<Radio color="success" />}
+                    label="Completed"
                   />
-                <FormControlLabel
-                  value="In Progress"
-                  control={<Radio color="warning" />}
-                  label="In Progress"
+                  <FormControlLabel
+                    value="In Progress"
+                    control={<Radio color="warning" />}
+                    label="In Progress"
                   />
-              </RadioGroup>
-            </FormControl>
-                  </>
+                </RadioGroup>
+              </FormControl>
+            </>
           )}
           <Box sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
             {currentUser?.role === "admin" ? (
@@ -438,7 +447,7 @@ export default function SpecificTask() {
                     sx={{
                       "&:hover": {
                         background: "none",
-                      }, 
+                      },
                     }}
                   >
                     <Chip
@@ -456,41 +465,37 @@ export default function SpecificTask() {
                         py: 2.3,
                         bgcolor: "#a3c08f22",
                         color: "#268924ae",
-                        border:"0.5px solid black"
+                        border: "0.5px solid black",
                       }}
                     />
                   </Button>
                 )}
               </>
             ) : (
-              <Button 
-               onClick={handleSubmit}
-               sx={{
-                      "&:hover": {
-                        background: "none",
-                      },
-                      
-                    }}
-               >
-                
+              <Button
+                onClick={handleSubmit}
+                sx={{
+                  "&:hover": {
+                    background: "none",
+                  },
+                }}
+              >
                 <Chip
-                      icon={
-                        <TaskAltIcon
-                          sx={{ color: "#FFFFFF", fontSize: "27px" }}
-                        />
-                      }
-                      label="Submit"
-                      variant="filled"
-                      sx={{
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        px: 1.5,
-                        py: 2.3,
-                        bgcolor: "#a3c08f22",
-                        color: "#268924ae",
-                        border:"0.5px solid black"
-                      }}
-                    />
+                  icon={
+                    <TaskAltIcon sx={{ color: "#FFFFFF", fontSize: "27px" }} />
+                  }
+                  label="Submit"
+                  variant="filled"
+                  sx={{
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    px: 1.5,
+                    py: 2.3,
+                    bgcolor: "#a3c08f22",
+                    color: "#268924ae",
+                    border: "0.5px solid black",
+                  }}
+                />
               </Button>
             )}
           </Box>

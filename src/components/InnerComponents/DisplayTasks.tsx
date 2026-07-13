@@ -170,7 +170,7 @@ export default function DisplayTasks() {
       headerName: "Due Date",
       minWidth: 130,
       type: "date",
-      valueGetter: (value) => (value ? new Date(value) : null),
+      valueGetter: (value) => (value ? new Date(value?.split('T')[0]) : null),
       filterOperators: [betweenOperator],
       renderHeader() {
         return (
