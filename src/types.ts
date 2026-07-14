@@ -50,10 +50,16 @@ export type userDataType = {
 //specific task
 
 export type createTaskDataType={
-    title?:string,
-    description?:string,
-    status?: string,
-    assignedUser?:userDataType,
+    tasks_title?:string,
+    tasks_description?:string,
+    tasks_status?: string,
+    users_userid:number,
+    admins_userid:number,
+    tasks_taskId :number,   
+    tasks_dueDate:string,
+    users_email:string,
+    admins_email:string,
+    tasks_priority:string
     
 }
  

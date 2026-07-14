@@ -13,17 +13,53 @@ export default function Reports() {
   const [tasks, setTasks] = useState([]);
   const [result, setResult] = useState([]);
 
-  const [priorityCount,setPriorityCount]=useState([]);
+  const [priorityCount, setPriorityCount] = useState([]);
   useEffect(() => {
     const role = currentUser?.role;
-    const prefix=role=='user' ? "admin" : "user";
+    const prefix = role == "user" ? "admin" : "user";
     async function getTasksCall() {
-      const response1 = await axios.get(`http://localhost:5000/${role}/fetch-tasks-status`,{ withCredentials: true });
-      const response2 = await axios.get(`http://localhost:5000/${role}/fetch-tasks-${prefix}`,{ withCredentials: true });
-      const response3=await axios.get(`http://localhost:5000/${role}/fetch-priority-count`,{withCredentials:true});
-      setTasks(response1.data);
-      setResult(response2.data);
-      setPriorityCount(response3?.data);
+      const response1 = await axios.post(
+        `http://localhost:5000/graphql`,
+        {
+          query: `query{
+              fetchTaskStatuses {
+                taskStatusCount
+                count
+              }
+            }`,
+        },
+        { withCredentials: true },
+      );
+
+      const response2 = await axios.post(
+        `http://localhost:5000/graphql`,
+        {
+          query: `query{
+  fetchUserAndAdminStatuses {
+    email
+    status
+    totalTasks
+  }
+}`,
+        },
+        { withCredentials: true },
+      );
+      const response3 = await axios.post(
+        `http://localhost:5000/graphql`,
+        {
+          query: `query{
+  fetchPriorityCount {
+    label1
+    label2
+    value
+  }
+}`,
+        },
+        { withCredentials: true },
+      );
+      setTasks(response1?.data?.data?.fetchTaskStatuses);
+      setResult(response2?.data?.data?.fetchUserAndAdminStatuses);
+      setPriorityCount(response3?.data?.data?.fetchPriorityCount);
     }
     getTasksCall();
   }, [currentUser]);
@@ -61,15 +97,14 @@ export default function Reports() {
           </Typography>
         </Box>
       )}
-      <Box sx={{ display: "flex", justifyContent: "center",gap:5 }}>
-        <Piechart2 data={priorityCount}/>
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 5 }}>
+        <Piechart2 data={priorityCount} />
         <BarChartBoard tasks={tasks} />
         <PieChartBoard tasks={tasks} />
       </Box>
       <Box sx={{ mt: 5 }}>
         <BarChart2 result={result} />
       </Box>
-      
     </>
   );
 }

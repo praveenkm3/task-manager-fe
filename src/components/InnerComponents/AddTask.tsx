@@ -27,11 +27,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 
-// export default function BasicDatePicker() {
-//   return (
-
-//   );
-// }
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -66,14 +61,23 @@ export default function Addtask() {
   });
   const [users, setUsers] = useState<userDataType[] | null>(null);
   useEffect(() => {
-    async function fetchUsers() {
-      const response = await axios.get(
-        "http://localhost:5000/admin/fetch-users",
-        { withCredentials: true },
-      );
-      setUsers(response.data);
+    async function fetchUsersApi() {
+      const response=await axios.post('http://localhost:5000/graphql',{
+        query:`query{
+  fetchUsers {
+    email
+    isActive
+    userName
+    userId
+    role
+  }
+}`},{withCredentials:true});
+      // console.log(response);
+      
+      // console.log(response?.data?.data?.fetchUsers);
+      setUsers(response?.data?.data?.fetchUsers);
     }
-    fetchUsers();
+    fetchUsersApi();
   }, []);
   const handleTask = (event: eventType) => {
     const { name, value } = event.target;
@@ -100,16 +104,22 @@ export default function Addtask() {
     }
     // console.log(taskData, dateValue,priority);
     try {
-      const response = await axios.post(
-        "http://localhost:5000/admin/add-task",
-        {
-          ...taskData,
-          dueDate: dateValue,
-          priority: priority,
-        },
-        { withCredentials: true },
-      );
-      if (response.status === 201) {
+      const response=await axios.post("http://localhost:5000/graphql",{
+        query:`
+        mutation($input: AddTaskInput!){
+          addTask(input: $input)
+        }`,variables:{
+          input:{
+            title: taskData?.title,
+            description: taskData?.description,
+            assigned_user_id: taskData?.assigned_user_id,  
+            dueDate: dateValue,
+            priority: priority,
+          }
+        }
+      },{withCredentials:true})
+      // console.log(response);
+      if (response?.data?.data.addTask==='Task Created Successfully') {
         console.log("added");
         setMessage("✅ Task added successfully");
         setFlag(true);
@@ -118,7 +128,6 @@ export default function Addtask() {
         setFlag(true);
         console.log("not added");
       }
-      //   console.log(response);
     } catch (error) {
       console.log(error);
     }
