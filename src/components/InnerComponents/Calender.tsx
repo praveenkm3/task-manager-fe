@@ -13,11 +13,21 @@ export default function Calender() {
   const role = currentUser?.role;
   useEffect(() => {
     async function fetchDates() {
-      const response = await axios.get(
-        `http://localhost:5000/${role}/fetch-dates`,
+      const response = await axios.post(
+        `http://localhost:5000/graphql`,{
+          query:`query{
+  fetchDates {
+    duedate
+    id
+    taskname
+    tasks_taskId
+    status
+  }
+}`
+        },
         { withCredentials: true },
       );
-      setTaskDates(response?.data);
+      setTaskDates(response?.data?.data?.fetchDates);
     }
     fetchDates();
   }, [role]);

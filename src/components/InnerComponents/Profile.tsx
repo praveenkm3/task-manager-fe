@@ -18,11 +18,20 @@ export default function Profile() {
       prefix = "admin";
     }
     async function runner() {
-      const response = await axios.get(
-        `http://localhost:5000/${role}/fetch-tasks-${prefix}`,
+      const response = await axios.post(
+        `http://localhost:5000/graphql`,
+        {
+          query: `query{
+  fetchUserAndAdminStatuses {
+    email
+    status
+    totalTasks
+  }
+}`,
+        },
         { withCredentials: true },
       );
-      setProfiles(response.data);
+      setProfiles(response?.data?.data?.fetchUserAndAdminStatuses);
     }
     runner();
   }, [currentUser, role]);

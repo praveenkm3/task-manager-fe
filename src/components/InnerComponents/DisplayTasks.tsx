@@ -14,6 +14,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
+//graphQL
+
 const ILikeInput = (props) => {
   const { item, applyValue } = props; //data and setter function
   // console.log(item);
@@ -35,7 +37,6 @@ const ilikeOperator = {
   InputComponent: ILikeInput,
 };
 
-
 const BetweenInput = (props) => {
   const { item, applyValue } = props;
   const [startDate, setStartDate] = React.useState<Dayjs | null>(null);
@@ -43,19 +44,19 @@ const BetweenInput = (props) => {
 
   const handleStartDateChange = (newValue: Dayjs | null) => {
     setStartDate(newValue);
-    if (applyValue) { 
+    if (applyValue) {
       applyValue({ ...item, value: [newValue, endDate] });
     }
   };
 
   const handleEndDateChange = (newValue: Dayjs | null) => {
     setEndDate(newValue);
-    if (applyValue) { 
+    if (applyValue) {
       applyValue({ ...item, value: [startDate, newValue] });
     }
   };
 
-  return ( 
+  return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <DatePicker
@@ -169,8 +170,8 @@ export default function DisplayTasks() {
       field: "tasks_dueDate",
       headerName: "Due Date",
       minWidth: 130,
-      type: "date",
-      valueGetter: (value) => (value ? new Date(value?.split('T')[0]) : null),
+      type: "string",
+      valueGetter: (value) => (value ? dayjs(value).format("YYYY-MM-DD"): null),
       filterOperators: [betweenOperator],
       renderHeader() {
         return (
@@ -292,23 +293,43 @@ export default function DisplayTasks() {
       () => {
         async function runFilter() {
           try {
-            const response = await axios.post(
-              `http://localhost:5000/${currentUser?.role}/fetch-tasks`,
+            const res2 = await axios.post(
+              "http://localhost:5000/graphql",
               {
-                page: page,
-                records: records,
-                filterColumn: filterValue ? filterColumn : undefined,
-                filterValue: Array.isArray(filterValue) ?
-                filterValue[0] && filterValue[1] ? filterValue : undefined : filterValue || undefined,
-                // filterValue: filterValue.length && (filterValue[0].length > 0 && filterValue[1].length > 0) ? filterValue || undefined : filterValue,
-                filterOperator: filterValue ? filterOperator : undefined,
-                sortColumnName: sortColumn || undefined,
-                sortOrder: sortOrder || undefined,
+                query: `query {
+                            tasks {
+                                result {
+                                    tasks_taskId
+                                    tasks_title
+                                    tasks_description 
+                                    tasks_status 
+                                    tasks_dueDate 
+                                    users_email 
+                                    admins_email 
+                                    tasks_priority 
+                                }
+                                length
+                            }
+                        }`,
+                body: {
+                  page: page,
+                  records: records,
+                  filterColumn: filterValue ? filterColumn : undefined,
+                  filterValue: Array.isArray(filterValue)
+                    ? filterValue[0] && filterValue[1]
+                      ? filterValue
+                      : undefined
+                    : filterValue || undefined,
+                  filterOperator: filterValue ? filterOperator : undefined,
+                  sortColumnName: sortColumn || undefined,
+                  sortOrder: sortOrder || undefined,
+                },
               },
               { withCredentials: true },
             );
-            setRows(response.data?.result);
-            setTotal(response?.data?.length);
+            setRows(res2?.data?.data?.tasks?.result);
+            setTotal(res2?.data?.data?.tasks?.length);
+            
           } catch (error) {
             console.log(error);
           }

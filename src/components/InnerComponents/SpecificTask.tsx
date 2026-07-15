@@ -67,47 +67,46 @@ export default function SpecificTask() {
   const taskId = parseInt(id as string);
   useEffect(() => {
     async function getOneTask() {
-      const response = await axios.get(
-        `http://localhost:5000/${currentUser.role}/fetch-specific-task/${taskId}`,
+      const response2 = await axios.post(
+        "http://localhost:5000/graphql",
+        {
+          query: `query($taskId: Int!){
+  getOneTask(taskId: $taskId) {
+    admins_email
+    tasks_description
+    tasks_dueDate
+    tasks_priority
+    tasks_status
+    tasks_taskId
+    tasks_title
+    users_email
+    admins_userid
+    users_userid
+  }
+}`,
+          variables: {
+            taskId: taskId,
+          },
+        },
         { withCredentials: true },
       );
-      setData(response.data[0]);
-      console.log(response.data);
+      // console.log(response2?.data?.data.getOneTask[0]);
+      setData(response2?.data?.data.getOneTask[0]);
     }
     getOneTask();
   }, [taskId, currentUser.role]);
   useEffect(() => {
-    if (data?.priority) {
-      setPriority(data.priority);
+    if (data?.tasks_priority) {
+      setPriority(data?.tasks_priority);
     }
-    if (data?.dueDate) {
-      setDateValue(dayjs(data?.dueDate?.split('T')[0]));
+    if (data?.tasks_status) { 
+      setRadio(data?.tasks_status);
+    }
+    if (data?.tasks_dueDate) {
+      setDateValue(dayjs(data?.tasks_dueDate));
     }
   }, [data]);
-  function handleSubmit() {
-    if (radio) {
-      async function updateTask() {
-        const response = await axios.patch(
-          "http://localhost:5000/user/update-task",
-          {
-            id: taskId,
-            status: radio,
-          },
-          { withCredentials: true },
-        );
-        // console.log(response.data);
-        if (response.status) {
-          setMessage("✅ Task status changed successfully ");
-          setFlag(true);
-        } else {
-          setMessage("❌ Task status changed Unsuccessfully");
-          setFlag(true);
-        }
-      }
 
-      updateTask();
-    }
-  }
   const action = (
     <>
       <IconButton
@@ -121,73 +120,95 @@ export default function SpecificTask() {
     </>
   );
   const [personName, setPersonName] =
-    useState<React.SetStateAction<string | number | undefined>>("");
+    useState<React.SetStateAction<string | number | undefined>>(0);
   const handleSelection = (event: SelectChangeEvent<string>) => {
     const { value } = event.target;
     setPersonName(value);
-    setData((prev) => ({ ...prev, assigned_user_id: value }));
+    setData((prev) => ({ ...prev, users_userid: value }));
   };
   const [users, setUsers] = useState<userDataType | null>(null);
   useEffect(() => {
-    async function fetchUsers() {
-      const response = await axios.get(
-        "http://localhost:5000/admin/fetch-users",
-        { withCredentials: true },
-      );
-      setUsers(response.data);
+    async function fetchUsersApi() {
+      const response=await axios.post('http://localhost:5000/graphql',{
+        query:`query{
+  fetchUsers {
+    email
+    isActive
+    userName
+    userId
+    role
+  }
+}`},{withCredentials:true});
+      // console.log(response);
+      // console.log(response?.data?.data?.fetchUsers);
+      setUsers(response?.data?.data?.fetchUsers);
     }
-    if (currentUser.role === "admin") {
-      fetchUsers();
+    if(currentUser?.role==='admin'){
+      fetchUsersApi();
     }
   }, [currentUser.role]);
   const [edit, setEdit] = useState<boolean>(false);
   function handleEdit() {
     setEdit(true);
-    setPersonName(data?.assignedUser?.userId);
+    setPersonName(data?.users_userid);
   }
   function handleDelete() {
+
     async function deleteTaskByAdmin() {
-      const response = await axios.delete(
-        `http://localhost:5000/admin/delete-task`,
-        {
-          withCredentials: true,
-          data: {
-            taskId: data?.taskId,
-          },
-        },
-      );
+      const response=await axios.post('http://localhost:5000/graphql',{
+        query:`
+            mutation($taskId: Int!){
+                  deleteTask(taskId: $taskId)
+            }
+        `,
+        variables:{
+          taskId:data?.tasks_taskId
+        }
+      },{withCredentials:true})
       // console.log(response);
-      if (response.status === 200) {
-        console.log("added");
+      if (response?.data?.data?.deleteTask==='Task Deleted Successfully') {
+        console.log("deleted");
         setMessage("✅ Task deleted successfully");
         navigate("/tasks");
         setFlag(true);
       } else {
         setMessage("❌ Task deleted Unsuccessfully");
         setFlag(true);
-        console.log("not added");
+        console.log("not deleted");
       }
+      
+      
     }
     deleteTaskByAdmin();
   }
-  function handleAdminSubmit() {
-    async function updateTaskByAdmin() {
+  function handleUpdate() {
+    async function updateTask() {
       // console.log(data);
       // console.log(personName);
-      const response = await axios.put(
-        "http://localhost:5000/admin/update-task",
+      const res2 = await axios.post(
+        "http://localhost:5000/graphql",
         {
-          taskId: data?.taskId,
-          title: data?.title,
-          description: data?.description,
-          assigned_user_id: personName,
-          dueDate: dateValue,
-          priority: priority,
+          query: `
+      mutation($input: UpdateTaskInput!) {
+  updateTask(input: $input)
+}
+    `,
+          variables: {
+            input: {
+              taskId: data?.tasks_taskId,
+              title: data?.tasks_title,
+              description: data?.tasks_description,
+              assigned_user_id: personName,
+              duedate: dateValue,
+              priority: priority,
+              status: radio,
+            },
+          },
         },
         { withCredentials: true },
       );
-      if (response.status === 201) {
-        console.log("added");
+      // console.log(res2?.data?.data?.updateTask);
+      if (res2?.data?.data?.updateTask === "Update Success") {
         setMessage("✅ Task Updated successfully");
         setFlag(true);
       } else {
@@ -195,12 +216,11 @@ export default function SpecificTask() {
         setFlag(true);
         console.log("not added");
       }
-      //  console.log(response);
     }
-    updateTaskByAdmin();
+    updateTask();
   }
   function handleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    const { name, value } = event.target;
+    const { name, value } = event.target; 
     setData((prev) => ({ ...prev, [name]: value }));
     // console.log("inside handle change ");
   }
@@ -229,7 +249,7 @@ export default function SpecificTask() {
           }}
         >
           <FormLabel
-            htmlFor="title"
+            htmlFor="tasks_title"
             sx={{ fontWeight: 700, fontSize: "20px", color: "black" }}
           >
             <Typography variant="h5" color="initial">
@@ -237,11 +257,11 @@ export default function SpecificTask() {
             </Typography>
           </FormLabel>
           <TextField
-            id="title"
+            id="tasks_title"
             variant="outlined"
             placeholder="Enter Task Title"
-            name="title"
-            value={data?.title || ""}
+            name="tasks_title"
+            value={data?.tasks_title || ""}
             onChange={currentUser.role === "admin" && handleChange}
             disabled={!edit}
             sx={{
@@ -252,7 +272,7 @@ export default function SpecificTask() {
             }}
           />
           <FormLabel
-            htmlFor="description"
+            htmlFor="tasks_description"
             sx={{ fontWeight: 700, fontSize: "20px", color: "black" }}
           >
             <Typography variant="h5" color="initial">
@@ -260,9 +280,9 @@ export default function SpecificTask() {
             </Typography>
           </FormLabel>
           <TextField
-            id="description"
-            name="description"
-            value={data?.description || ""}
+            id="tasks_description"
+            name="tasks_description"
+            value={data?.tasks_description || ""}
             multiline
             rows={5}
             variant="outlined"
@@ -363,8 +383,7 @@ export default function SpecificTask() {
                   Change Status
                 </Typography>
                 <RadioGroup
-                  // aria-labelledby={`${id}-label`}
-                  defaultValue="TO DO"
+                  value={radio}
                   name="radio-buttons-group"
                   onChange={(event) => setRadio(event.target.value)}
                 >
@@ -404,7 +423,7 @@ export default function SpecificTask() {
                       </DialogTitle>
                       <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                          {data?.description}
+                          {data?.tasks_description}
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
@@ -443,7 +462,7 @@ export default function SpecificTask() {
                 )}
                 {edit && (
                   <Button
-                    onClick={handleAdminSubmit}
+                    onClick={handleUpdate}
                     sx={{
                       "&:hover": {
                         background: "none",
@@ -473,7 +492,7 @@ export default function SpecificTask() {
               </>
             ) : (
               <Button
-                onClick={handleSubmit}
+                onClick={handleUpdate}
                 sx={{
                   "&:hover": {
                     background: "none",
