@@ -10,7 +10,7 @@ export default function BarChartBoard({tasks}) {
 
   
   const completed={name:"Completed",value:0};
-  const pending={name:"Pending",value:0};
+  const pending={name:"On Hold",value:0};
   const progress={name:"Progress",value:0};
   const todo={name:"TO DO",value:0};
   for(let i=0;i<tasks.length;i++){
@@ -19,7 +19,7 @@ export default function BarChartBoard({tasks}) {
       completed.value=curr.count
     }else if(curr?.taskStatusCount==='In Progress'){
       progress.value=curr.count;
-    }else if(curr.taskStatusCount==='pending'){
+    }else if(curr.taskStatusCount==='On Hold'){
       pending.value=curr.count;
     }else if(curr.taskStatusCount==='TO DO'){
       todo.value=curr.count;
@@ -34,10 +34,10 @@ const uData = [
       xAxis={[
         {
           scaleType: "band",
-          data: ["COMPLETED", "PENDING", "IN PROGRESS", "TO DO"],
+          data: ["COMPLETED", "ON HOLD", "IN PROGRESS", "TO DO"],
           colorMap: {
         type: 'ordinal',
-        colors: ['#4254fb', '#2196f3', '#ff9800', '#f44336']
+        colors: ['#4CAF50',"#FF9800", '#2196F3', '#9E9E9E']
       }
         },
       ]}

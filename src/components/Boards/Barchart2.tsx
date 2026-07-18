@@ -3,10 +3,10 @@ import { Box } from "@mui/material";
 
 export default function BarChart2({ result }) {
   const colorMap = {
-    COMPLETED: "#4254fb",
-    "IN PROGRESS": "#F9A825",
-    "TO DO": "#E53935",
-    PENDING: "#29B9F6",
+    "COMPLETED": "#4CAF50",
+    "IN PROGRESS": "#2196F3",
+    "TO DO": "#9E9E9E",
+    "ON HOLD": "#FF9800",
   };
 
   const users = [...new Set(result.map((item) => item.email))];

@@ -142,7 +142,7 @@ export default function DisplayTasks() {
               color:
                 tasks_status === "TO DO"
                   ? "#2a2929"
-                  : tasks_status === "pending"
+                  : tasks_status === "On Hold"
                   ? "#f66868"
                   : tasks_status === "In Progress"
                   ? "#1591DC"
@@ -226,7 +226,7 @@ export default function DisplayTasks() {
     {
       field: "tasks_taskId",
       headerName: "",
-      minWidth: 200,
+      minWidth: 50,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
@@ -240,7 +240,7 @@ export default function DisplayTasks() {
       },
     },
   ];
-  const { currentUser } = UseAuth();
+  const { currentUser } = UseAuth()!;
   if (currentUser?.role === "admin") {
     columns[3] = {
       field: "users_email",

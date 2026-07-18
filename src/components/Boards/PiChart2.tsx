@@ -6,8 +6,9 @@ export default function Piechart2({data}) {
 const priorityColors = {
   High: "#f44336",     
   Medium: "#fbc02d",  
-  Low: "#2196f3",     
+  Low: "#388E3C"     
 };
+
 const data1 = data.reduce((acc, item) => {
   const existing = acc.find(x => x.label === item.label1);
 

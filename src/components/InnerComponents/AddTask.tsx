@@ -168,8 +168,7 @@ export default function Addtask() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        width: "100%",
-        height: "85vh",
+        ml:10
       }}
     >
       <Box

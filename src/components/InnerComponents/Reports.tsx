@@ -8,15 +8,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Reports() {
-  const { currentUser } = UseAuth();
+  const { currentUser } = UseAuth()!;
 
   const [tasks, setTasks] = useState([]);
   const [result, setResult] = useState([]);
 
   const [priorityCount, setPriorityCount] = useState([]);
   useEffect(() => {
-    const role = currentUser?.role;
-    const prefix = role == "user" ? "admin" : "user";
     async function getTasksCall() {
       const response1 = await axios.post(
         `http://localhost:5000/graphql`,

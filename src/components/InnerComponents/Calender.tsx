@@ -2,13 +2,14 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { Box } from "@mui/material";
 import { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import axios from "axios";
 import { UseAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router";
 
 export default function Calender() {
   const [taskDates, setTaskDates] = useState([]);
-  const { currentUser } = UseAuth();
+  const { currentUser } = UseAuth()!;
   const navigate = useNavigate();
   const role = currentUser?.role;
   useEffect(() => {
@@ -34,29 +35,29 @@ export default function Calender() {
 
   // console.log(taskDates);
 
-  const calendarEvents = taskDates?.map((task) => ({
+  const calendarEvents = taskDates?.map((task:any) => ({
     id: task?.id,
     title: task?.taskname,
-    start: task?.duedate?.split("T")[0],
+    start: dayjs(task?.duedate).format("YYYY-MM-DD"),
     backgroundColor:
-      task?.status === "Pending"
+      task?.status === "In Progress"
         ? "#E3F2FD"
         : task?.status === "Completed"
         ? "#E8F5E9"
         : task?.status === "TO DO"
         ? "#FFEBEE"
-        : task?.status === "In Progress"
+        : task?.status === "On Hold"
         ? "#FFF3E0"
         : "#F5F5F5",
 
     borderColor:
-      task?.status === "Pending"
+      task?.status === "In Progress"
         ? "#2196F3"
         : task?.status === "Completed"
         ? "#4CAF50"
         : task?.status === "TO DO"
         ? "#F44336"
-        : task?.status === "In Progress"
+        : task?.status === "On Hold"
         ? "#FF9800"
         : "#BDBDBD",
     textColor: "#172B4D",

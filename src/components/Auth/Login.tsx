@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { UseAuth } from "../../contexts/AuthContext";
 import LoginIcon from "../../../public/assets/Login copy.png";
 export default function Login() {
-  const { currentUser, setCurrentUser } = UseAuth();
+  const { currentUser, setCurrentUser } = UseAuth()!;
   if (currentUser) {
     console.log(currentUser);
   }
@@ -76,6 +76,9 @@ export default function Login() {
     setRegisterData(null);
     setError({ emailError: false, passwordError: false });
   }
+  function handleForgot(){
+    navigate('/forgot');
+  }
 
   return (
     <Box
@@ -94,7 +97,7 @@ export default function Login() {
           display: "flex",
           justifyContent: "flex-start",
           flexDirection: "column",
-          gap: 3,
+          gap: 1,
           // border:"1px solid black",
           p: 5,
           borderRadius: 5,
@@ -155,6 +158,9 @@ export default function Login() {
             name="password"
           />
           
+        </Box>
+        <Box sx={{display:"flex",justifyContent:"end"}}>
+            <Button sx={{textTransform: "none"}} onClick={handleForgot}>Forgot Password</Button>
         </Box>
 
          <Button

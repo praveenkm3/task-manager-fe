@@ -105,7 +105,7 @@ export default function SpecificTask() {
     if (data?.tasks_dueDate) {
       setDateValue(dayjs(data?.tasks_dueDate));
     }
-  }, [data]);
+  }, [data?.tasks_taskId]);
 
   const action = (
     <>
@@ -244,7 +244,7 @@ export default function SpecificTask() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: 2,
             width: "70ch",
           }}
         >
@@ -300,13 +300,52 @@ export default function SpecificTask() {
           <Box></Box>
           {currentUser.role === "admin" && edit && (
             <>
+              <>
+              <FormControl sx={{ mb: 0 }} disabled={!edit}>
+                <Typography sx={{ color: "black", fontSize: "21px"}}>
+                  Change Status
+                </Typography>
+                <RadioGroup
+                  value={radio}
+                  name="radio-buttons-group"
+                  onChange={(event) => setRadio(event.target.value)} 
+                >
+                  <Box sx={{display:"flex"}}>
+                    <FormControlLabel
+                    value="TO DO"
+                    control={<Radio color="secondary" />}
+                    label="TO DO"
+                    sx={{width:100}}
+                  />
+                  <FormControlLabel
+                    value="Completed"
+                    control={<Radio color="success" />}
+                    label="Completed"
+                    sx={{width:150}}
+                  />
+                  <FormControlLabel
+                    value="In Progress"
+                    control={<Radio color="warning" />}
+                    label="In Progress"
+                    sx={{width:150}}
+                  />
+                  <FormControlLabel
+                    value="On Hold"
+                    control={<Radio color="error" />}
+                    label="On Hold"
+                    sx={{width:150}}
+                  />
+                  </Box>
+                </RadioGroup>
+              </FormControl>
+              </>
               <Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DemoContainer components={["DesktopDatePicker"]}>
                     <DesktopDatePicker
                       label="Due Date"
                       disabled={!edit}
-                      onChange={(newValue) => setDateValue(newValue)}
+                      onChange={(newValue) => setDateValue(newValue!)}
                       value={dateValue}
                       slotProps={{
                         textField: {
@@ -317,7 +356,10 @@ export default function SpecificTask() {
                   </DemoContainer>
                 </LocalizationProvider>
               </Box>
-              <RadioGroup
+              
+             <Box>
+              <Typography variant="h5" color="initial" sx={{}}>Priority</Typography>
+               <RadioGroup
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 sx={{ display: "flex", flexDirection: "row" }}
@@ -334,6 +376,7 @@ export default function SpecificTask() {
                   label="High"
                 />
               </RadioGroup>
+             </Box>
 
               <FormLabel
                 htmlFor="selectUser"
@@ -378,7 +421,7 @@ export default function SpecificTask() {
           )}
           {currentUser?.role === "user" && (
             <>
-              <FormControl sx={{ width: "30%", mt: 0 }}>
+              <FormControl sx={{ width: "30%", mt: 0 }} >
                 <Typography sx={{ color: "black", fontSize: "21px", pb: 2 }}>
                   Change Status
                 </Typography>
@@ -401,6 +444,11 @@ export default function SpecificTask() {
                     value="In Progress"
                     control={<Radio color="warning" />}
                     label="In Progress"
+                  />
+                  <FormControlLabel
+                    value="On Hold"
+                    control={<Radio color="error" />}
+                    label="On Hold"
                   />
                 </RadioGroup>
               </FormControl>
@@ -482,8 +530,8 @@ export default function SpecificTask() {
                         fontWeight: 700,
                         px: 1.5,
                         py: 2.3,
-                        bgcolor: "#a3c08f22",
-                        color: "#268924ae",
+                        bgcolor: "#bcc2d522",
+                        color: "#0c0725bc",
                         border: "0.5px solid black",
                       }}
                     />

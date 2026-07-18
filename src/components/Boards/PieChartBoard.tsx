@@ -1,9 +1,8 @@
 import { PieChart } from "@mui/x-charts/PieChart"; 
 import { Box } from "@mui/material";
 export default function PieChartBoard({tasks}) {
- 
   const completed={name:"Completed",value:0};
-  const pending={name:"Pending",value:0};
+  const pending={name:"On Hold",value:0};
   const progress={name:"Progress",value:0};
   const todo={name:"TO DO",value:0};
   for(let i=0;i<tasks.length;i++){
@@ -12,7 +11,7 @@ export default function PieChartBoard({tasks}) {
       completed.value=curr.count
     }else if(curr?.taskStatusCount==='In Progress'){
       progress.value=curr.count;
-    }else if(curr.taskStatusCount==='pending'){
+    }else if(curr.taskStatusCount==='On Hold'){
       pending.value=curr.count;
     }else if(curr.taskStatusCount==='TO DO'){
       todo.value=curr.count;
@@ -24,14 +23,14 @@ export default function PieChartBoard({tasks}) {
         series={[
           {
             data: [
-              { id: 0, value: completed.value, label: "COMPLETED" },
+              { id: 0, value: completed.value, label: "COMPLETED",color:"#4CAF50" },
               {
                 id: 1,
                 value: progress.value,
-                label: "IN PROGRESS",
+                label: "IN PROGRESS",color:"#2196F3"
               },
-              { id: 2, value: todo.value, label: "TO DO" },
-              { id: 3, value: pending.value, label: "PENDING" },
+              { id: 2, value: todo.value, label: "TO DO",color:"#9E9E9E" },
+              { id: 3, value: pending.value, label: "ON HOLD",color: "#FF9800"},
             ],
           },
         ]}

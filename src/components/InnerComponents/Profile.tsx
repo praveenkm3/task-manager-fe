@@ -1,22 +1,28 @@
 import { UseAuth } from "../../contexts/AuthContext";
-import { Box, Typography, Avatar, Paper, Badge, Chip } from "@mui/material";
+import { Box, Typography, Avatar, Paper } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PlaceIcon from "@mui/icons-material/Place";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-
+import { Random } from "random-js";
+const colorArray = [
+  "#FFD400",
+  "#39B1D1",
+  "#4647AE",
+  "#659287",
+  "#6FD1D7",
+  "#4B4038",
+  "#ACCFA3",
+  "#FF653F",
+  "#1E104E",
+];
 export default function Profile() {
-  const { currentUser } = UseAuth();
+  const random = new Random();
+  const { currentUser } = UseAuth()!;
   const [profiles, setProfiles] = useState([]);
   const role = currentUser?.role;
   useEffect(() => {
-    let prefix = "";
-    if (role === "admin") {
-      prefix = "user";
-    } else if (role == "user") {
-      prefix = "admin";
-    }
     async function runner() {
       const response = await axios.post(
         `http://localhost:5000/graphql`,
@@ -35,9 +41,8 @@ export default function Profile() {
     }
     runner();
   }, [currentUser, role]);
- 
-  
-// console.log(profiles);
+
+  // console.log(profiles);
   const groupedData = Object.values(
     profiles.reduce((acc, current) => {
       const email = current.email;
@@ -55,6 +60,15 @@ export default function Profile() {
     }, {}),
   );
   // console.log(groupedData);
+  const statusOrder = ["TO DO", "In Progress", "On Hold", "Completed"];
+
+  groupedData.forEach((user) => {
+    user.statuses.sort(
+      (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status),
+    );
+  });
+
+  console.log(groupedData);
   return (
     <>
       <Box
@@ -62,7 +76,6 @@ export default function Profile() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          
         }}
       >
         <Box sx={{ boxShadow: 5, height: "100vh", width: "100%" }}>
@@ -72,7 +85,7 @@ export default function Profile() {
             </Avatar>
             <Box>
               <Typography sx={{ mt: 1.5, fontWeight: 700, fontSize: "13px" }}>
-                {currentUser.email.toUpperCase()}
+                {currentUser?.email.toUpperCase()}
               </Typography>
             </Box>
 
@@ -146,7 +159,7 @@ export default function Profile() {
               return (
                 <Paper
                   elevation={5}
-                  sx={{ height: 250, width: 220, borderRadius: 2 }}
+                  sx={{ height: 210, width: 250, borderRadius: 2 }}
                   key={index}
                 >
                   <Box
@@ -164,7 +177,8 @@ export default function Profile() {
                             fontSize: "15px",
                             height: 30,
                             width: 30,
-                            color: "black",
+                            color: "white",
+                            bgcolor: `${colorArray[random.integer(0, colorArray.length - 1)]}`,
                           }}
                         >
                           {current?.user[0]?.toUpperCase()}
@@ -172,47 +186,71 @@ export default function Profile() {
                       </Box>
                       <Box>
                         <Typography sx={{ fontSize: "15px", mt: 0.5 }}>
-                          {current?.user[0].toUpperCase()+current?.user?.slice(1)}
+                          {current?.user[0].toUpperCase() +
+                            current?.user?.slice(1)}
                         </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      {current?.statuses?.map((item,index) => {
+                    <Box>
+                       <Box sx={{display:'flex',justifyContent:'space-between',gap:1,flexWrap:'wrap'}}>
+                      {current?.statuses?.map((item, index) => {
                         return (
                           <Box key={index}>
-                            <Box 
+                            <Box
                               sx={{
                                 display: "flex",
-                                flexDirection: "column",
+                                flexDirection: "row",
                                 gap: 2,
-                                
                               }}
                             >
-                              <Box sx={{ display: "flex" }}>
-                                <Badge
-                                  badgeContent={item?.totalTasks}
-                                  color={
-                                    item?.status === "TO DO"
-                                      ? "info"
-                                      : item?.status === "pending"
-                                      ? "error"
-                                      : item?.status === "In Progress"
-                                      ? "warning"
-                                      : "success"
-                                  }
-                                  overlap="circular" 
+                              <Box sx={{ display: "flex",mt:2 }}>
+                                <Box
+                                  sx={{
+
+                                    borderRadius:1,
+                                    fontSize: "12px",
+                                    bgcolor:
+                                      item?.status === "In Progress"
+                                        ? "#98baee34"
+                                        : item?.status === "TO DO"
+                                        ? "#7a7b7e29"
+                                        : item?.status === "Completed"
+                                        ? "#bed1b769"
+                                        : "#f9adad1d",
+
+                                    color:
+                                      item?.status === "TO DO"
+                                        ? "#2a2929"
+                                        : item?.status === "On Hold"
+                                        ? "#f66868"
+                                        : item?.status === "In Progress"
+                                        ? "#1591DC"
+                                        : "green",
+                                  }}
                                 >
-                                  <Chip
-                                    label={item?.status[0].toUpperCase()+item?.status?.slice(1)}
-                                    variant="outlined"
-                                    sx={{ m: 0.5 }}
-                                  />
-                                </Badge>
+                                 <Box sx={{minWidth:'50px',display:'flex',flexDirection:'row',gap:2,padding:1,}}>
+                                  <Typography variant="p" color="initial" >
+                                    {item?.status[0].toUpperCase() +
+                                    item?.status?.slice(1)}
+                                  </Typography>
+                                   <Box sx={{ fontSize: "12px", fontWeight: 700 }}>
+                                  {item?.totalTasks}
+                                </Box>
+                                </Box>
+                                  
+                                </Box>
+                               
+                                
                               </Box>
+                              
                             </Box>
+                            
                           </Box>
+                          
                         );
+
                       })}
+                      </Box>
                     </Box>
                   </Box>
                 </Paper>
@@ -223,25 +261,4 @@ export default function Profile() {
       </Box>
     </>
   );
-}
-{
-  /* <Box sx={{display:"flex",flexDirection:"column",gap:1.5,mt:4,px:5}}>
-            <Typography sx={{fontWeight:700}}>Task Summary</Typography>
-            <Typography sx={{fontSize:"12px"}}>IN PROGRESS <span style={{marginLeft:20,fontSize:15,fontWeight:700}}>{progress}</span> </Typography>
-            <Typography sx={{fontSize:"12px"}}>PENDING <span style={{marginLeft:50,fontSize:15,fontWeight:700}}>{pending}</span> </Typography>
-            <Typography sx={{fontSize:"12px"}}>TO DO <span style={{marginLeft:67,fontSize:15,fontWeight:700}}>{todo}</span> </Typography>
-            <Typography sx={{fontSize:"12px"}}>COMPLETED <span style={{marginLeft:30,fontSize:15,fontWeight:700}}> {completed}</span> </Typography>  
-
-        </Box> */
-}
-
-// {users?.map((user) => {
-//     return (
-//       <Box sx={{display:"flex",gap:0.7}} key={user}>
-//         <Avatar sx={{fontSize:"12px",height:30,width:30,color:"black"}}>
-//           {user[0].toUpperCase()}
-//         </Avatar>
-//         <Typography sx={{ fontSize: "12px" ,mt:1}}>{user}</Typography>
-//       </Box>
-//     );
-//   })}
+};
