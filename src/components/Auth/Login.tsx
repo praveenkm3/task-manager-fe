@@ -1,19 +1,19 @@
 import { Box, TextField, Button, IconButton } from "@mui/material";
 import { type register } from "../../types";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react"; 
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 import { UseAuth } from "../../contexts/AuthContext";
 import LoginIcon from "../../../public/assets/Login copy.png";
+import { useLogin } from "../../reactQuery/hooks/authHooks";
 export default function Login() {
   const { currentUser, setCurrentUser } = UseAuth()!;
+  const {mutate}=useLogin();
   if (currentUser) {
     console.log(currentUser);
   }
   const navigate = useNavigate();
-  const [registerData, setRegisterData] = useState<register | null>(null);
-  const [user, setUser] = useState<register | null>(null);
+  const [registerData, setRegisterData] = useState<register | null>(null); 
   const [error, setError] = useState({
     emailError: false,
     passwordError: false,
@@ -24,38 +24,6 @@ export default function Login() {
     const { name, value } = event.target;
     setRegisterData({ ...registerData, [name]: value });
   }
-
-  useEffect(() => {
-    async function login() {
-      try {
-        const response = await axios.post(
-          "http://localhost:5000/api/login",
-          {
-            email: user?.email?.toLocaleLowerCase(),
-            password: user?.password,
-          },
-          { withCredentials: true },
-        );
-        setCurrentUser({
-          role: response.data.role,
-          email: response.data.email,
-        });
-
-        if (response.status === 200) {
-          console.log("main page");
-          return navigate("/main");
-        } else {
-          console.log("still inside login page");
-          return navigate("/login");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    if (user) {
-      login();
-    }
-  }, [user, navigate, setCurrentUser]);
 
   function handleSubmit() {
     if (!registerData) {
@@ -71,9 +39,22 @@ export default function Login() {
         setError((prev) => ({ ...prev, passwordError: true }));
         return;
       }
-    }
-    setUser(registerData);
-    setRegisterData(null);
+    } 
+    mutate({
+      email:registerData?.email?.toLocaleLowerCase(),
+      password:registerData?.password,
+    },{
+      onSuccess:(data)=>{
+        setCurrentUser({
+          role:data.role,
+          email:data.email,
+        });
+      navigate('/main');
+      },
+      onError:()=>{
+        navigate("/login");
+      }
+    }) 
     setError({ emailError: false, passwordError: false });
   }
   function handleForgot(){

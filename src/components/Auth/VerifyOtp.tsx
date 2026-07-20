@@ -1,102 +1,95 @@
-import { Alert, Box, Button, Paper, Snackbar, TextField, Typography, type SnackbarCloseReason } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+  type SnackbarCloseReason,
+} from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import React from "react";
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-
+import {
+  useVerifyOtp,
+  useVerifyPassword,
+} from "../../reactQuery/hooks/authHooks";
 export default function VerifyOtp() {
+  const { mutate, isPending: isOtpPending } = useVerifyOtp();
+  const { mutate: mutatePassword, isPending: isPasswordPending } =
+    useVerifyPassword();
   const [otp, setOtp] = useState("");
   const email = sessionStorage.getItem("email");
   const navigate = useNavigate();
   const [makeEnterPassword, setMakeEnterPassword] = useState(false);
   const [password, setPassword] = useState("");
-  const [message,setMessage]=useState("");
-   const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = useState("");
+  const [open, setOpen] = React.useState(false);
   async function handleOtpSubmit(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    if (email) {
-      try {
-        const response = await axios.post(
-        "http://localhost:5000/api/verify-otp",
-        {
-          otp,
-          uemail: email,
-        },
-        { withCredentials: true },
-      );
-      if (response?.status === 200) {
-        setMakeEnterPassword(true);
-        return;
-      }else{
-        alert("Invalid Otp");
-        navigate('/forgot')
-      }
-      
-      } catch (error) {
-        console.log(error);
-        setOtp("");
-        // alert("Incorrect OTP Entered")
-        setMessage("Incorrect OTP Entered");
-        setOpen(true);
-        return;
-      }
+    if (!email || !otp) {
+      return;
     }
-    alert("Something Interuppted Session");
-    navigate('/forgot')
+    mutate(
+      {
+        uemail: email ?? "",
+        otp: otp,
+      },
+      {
+        onSuccess: () => {
+          setMakeEnterPassword(true);
+          setOpen(false);
+          return;
+        },
+        onError: () => {
+          setOtp("");
+          setMessage("Incorrect OTP Entered");
+          setOpen(true);
+          return;
+        },
+      },
+    );
   }
   async function handlePasswordSubmit() {
-    if (email) {
-      try {
-        const response = await axios.post(
-        "http://localhost:5000/api/change-password",
-        {
-          uemail: email,
-          password,
+    mutatePassword(
+      {
+        uemail: email,
+        password,
+      },
+      {
+        onSuccess: () => {
+          sessionStorage.removeItem("email");
+          navigate("/login");
         },
-        { withCredentials: true },
-      );
-      if (response.status === 200 && response.data.message ==='Generated New Password') {
-        sessionStorage.removeItem("email");
-        navigate("/login");
-      }else if(response.status === 200 && response.data.message ==='SamePasswordEntered'){
-        setPassword("");
-        // alert("Same Password Entered");
-        setMessage("Enter New password, It cannot be the same as the current password");
-        setOpen(true);
-        return;
-      }
-      } catch (error) {
-        console.log(error);
-        // alert("Invalid Attempt");
-        // setMessage("Invalid Attempt");
-        setOpen(true);
-        navigate('/forgot');
-        return;
-      }
-    }else{
-      setMessage("Something Interuppted Session");
-      setOpen(true);
-      return;
-      // return alert("Something Interuppted Session");
-    }
+        onError: (error) => {
+          if (error.response?.data?.message === "Not Generated New Password") {
+            navigate("/forgot");
+            return;
+          } else if (error.response?.data?.message === "SamePasswordEntered") {
+            setPassword("");
+            setMessage(
+              "Enter New password, It cannot be the same as the current password",
+            );
+            setOpen(true);
+            return;
+          }
+        },
+      },
+    );
   }
-
-
- 
-
-
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
     reason?: SnackbarCloseReason,
   ) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
 
     setOpen(false);
   };
-
 
   return (
     <>
@@ -119,16 +112,20 @@ export default function VerifyOtp() {
         >
           {!makeEnterPassword && (
             <>
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert
-          onClose={handleClose}
-          severity="warning"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+              <Snackbar
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+              >
+                <Alert
+                  onClose={handleClose}
+                  severity="warning"
+                  variant="filled"
+                  sx={{ width: "100%" }}
+                >
+                  {message}
+                </Alert>
+              </Snackbar>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography variant="h5" fontWeight="bold">
                   Enter OTP
@@ -156,9 +153,13 @@ export default function VerifyOtp() {
                   variant="contained"
                   fullWidth
                   sx={{ mt: 2 }}
-                  disabled={!otp.trim()}
+                  disabled={!otp.trim() || isOtpPending}
                 >
-                  Submit OTP
+                  {isOtpPending ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Submit OTP"
+                  )}
                 </Button>
               </Box>
             </>
@@ -168,16 +169,25 @@ export default function VerifyOtp() {
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 5 }}
               >
-                <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert
-          onClose={handleClose}
-          severity={message !== "Enter New password, It cannot be the same as the current password" ? "success"  :"error"}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+                <Snackbar
+                  open={open}
+                  autoHideDuration={6000}
+                  onClose={handleClose}
+                >
+                  <Alert
+                    onClose={handleClose}
+                    severity={
+                      message !==
+                      "Enter New password, It cannot be the same as the current password"
+                        ? "success"
+                        : "error"
+                    }
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                  >
+                    {message}
+                  </Alert>
+                </Snackbar>
                 <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
                   Enter New Password
                 </Typography>
@@ -197,10 +207,15 @@ export default function VerifyOtp() {
                   variant="contained"
                   fullWidth
                   sx={{ mt: 2 }}
-                  disabled={!password.trim()}
+                  disabled={!password.trim() || isPasswordPending}
                   onClick={handlePasswordSubmit}
                 >
-                  Change Password
+                  {isPasswordPending ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Change Password"
+                  )}
+                  
                 </Button>
               </Box>
             </>

@@ -1,10 +1,12 @@
-import { Alert, Box, Button, Paper, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Snackbar, TextField, Typography, type SnackbarCloseReason } from "@mui/material";
 import CircularProgress from '@mui/material/CircularProgress';
-import axios from "axios";
+// import axios from "axios";
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useForgot } from "../../reactQuery/hooks/authHooks";
 export default function ForgotPassword() {
+  const{mutate}=useForgot();
   const [email, setEmail] = useState("");
   const navigate=useNavigate();
   const [flag,setFlag]=useState(false);
@@ -13,20 +15,22 @@ export default function ForgotPassword() {
   const handleSendOtp = async(e:React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault(); 
     setFlag(true);
-    const response=await axios.post("http://localhost:5000/api/forgot",{
-      email
-    },{withCredentials:true});
-    if(response?.status===201){
-      setFlag(false);
-      sessionStorage.setItem("email",email);
-      navigate('/verify-otp');
-    }else{
-      // alert("Invalid Email Address");
-      setMessage("Invalid Email Address");
-      setOpen(true);
-      setFlag(false);
-      // navigate('/forgot');
-    }
+    // const response=await axios.post("http://localhost:5000/api/forgot",{
+    //   email
+    // },{withCredentials:true});
+    mutate( email ,{
+      onSuccess:()=>{
+        setFlag(false);
+        sessionStorage.setItem("email",email);
+        navigate('/verify-otp');
+      },
+      onError:()=>{
+        setMessage("Invalid Email Address");
+        setOpen(true);
+        setFlag(false);
+      }
+    })
+   
     
   };
 

@@ -6,7 +6,9 @@ import AuthProvider from "./contexts/AuthContext.tsx";
 import axios from "axios";
 import { ApolloProvider } from "@apollo/client/react";
 import client from "./Apollo/Client.ts";
-
+import queryClient from "./reactQuery/query.ts";
+import { QueryClientProvider } from "@tanstack/react-query";
+  
 axios.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -42,10 +44,12 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <>
+  <QueryClientProvider client={queryClient}> 
     <ApolloProvider client={client}>
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>
     </ApolloProvider>
+    </QueryClientProvider>
   </>,
 );
