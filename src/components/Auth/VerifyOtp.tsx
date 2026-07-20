@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Paper, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Snackbar, TextField, Typography, type SnackbarCloseReason } from "@mui/material";
 import React from "react";
 import axios from "axios";
 import { useState } from "react";
@@ -61,7 +61,7 @@ export default function VerifyOtp() {
       }else if(response.status === 200 && response.data.message ==='SamePasswordEntered'){
         setPassword("");
         // alert("Same Password Entered");
-        setMessage("Same Password Entered")
+        setMessage("Enter New password, It cannot be the same as the current password");
         setOpen(true);
         return;
       }
@@ -171,7 +171,7 @@ export default function VerifyOtp() {
                 <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert
           onClose={handleClose}
-          severity={message !== "Same Password Entered" ? "success"  :"error"}
+          severity={message !== "Enter New password, It cannot be the same as the current password" ? "success"  :"error"}
           variant="filled"
           sx={{ width: '100%' }}
         >
