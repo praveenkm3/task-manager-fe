@@ -1,41 +1,19 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { Box } from "@mui/material";
-import { useState, useEffect } from "react";
+import { Box } from "@mui/material"; 
 import dayjs from "dayjs";
-import axios from "axios";
-import { UseAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router";
+import { useFetchDates } from "../../reactQuery/hooks/fetchHooks"; 
+import Spinner from "./Spinner";
+export default function Calender() { 
+  const navigate = useNavigate(); 
 
-export default function Calender() {
-  const [taskDates, setTaskDates] = useState([]);
-  const { currentUser } = UseAuth()!;
-  const navigate = useNavigate();
-  const role = currentUser?.role;
-  useEffect(() => {
-    async function fetchDates() {
-      const response = await axios.post(
-        `http://localhost:5000/graphql`,{
-          query:`query{
-  fetchDates {
-    duedate
-    id
-    taskname
-    tasks_taskId
-    status
+  const {data,isLoading}=useFetchDates();
+  if(isLoading){
+    return <Spinner />
   }
-}`
-        },
-        { withCredentials: true },
-      );
-      setTaskDates(response?.data?.data?.fetchDates);
-    }
-    fetchDates();
-  }, [role]);
 
-  // console.log(taskDates);
-
-  const calendarEvents = taskDates?.map((task:any) => ({
+  const calendarEvents = data.fetchDates?.map((task:any) => ({
     id: task?.id,
     title: task?.taskname,
     start: dayjs(task?.duedate).format("YYYY-MM-DD"),

@@ -31,9 +31,9 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { UseAuth } from "../contexts/AuthContext";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import jiraSvg from "../../public/assets/jira copy.svg";
-import axios from "axios";
+import jiraSvg from "../../public/assets/jira copy.svg"; 
 import { useNavigate } from "react-router";
+import { useLogout } from "../reactQuery/hooks/authHooks";
 
 const drawerWidth = 240;
 
@@ -118,24 +118,22 @@ const Drawer = styled(MuiDrawer, {
     },
   ],
 }));
-
-export default function Sidebar({ children }) {
+interface Props{
+  children: React.ReactNode
+}
+export default function Sidebar({ children }:Props) {
+  const{mutate}=useLogout();
   const navigate = useNavigate();
-  const { currentUser, removeUser } = UseAuth();
+  const { currentUser, removeUser } = UseAuth()!;
 
   const handleLogout = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5000/api/logout",
-        {},
-        { withCredentials: true },
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
+    mutate(undefined,{
+    onSuccess:()=>{
       removeUser();
-      navigate("/login", { replace: true });
-    }
+      navigate('/login')
+    },onError:(err)=>{
+      console.log(err);
+    }})
   };
   let array = [
     { text: "PROFILE", path: "/profile", icon: <AccountCircleIcon /> },

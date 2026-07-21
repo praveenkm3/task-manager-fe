@@ -5,6 +5,7 @@ import {
   forgot,
   verifyOtp,
   verifyPassword,
+  logout
 } from "../../api/authAPI";
 
 export const useLogin = () => {
@@ -30,5 +31,10 @@ export const useVerifyOtp = () => {
 export const useVerifyPassword = () => {
   return useMutation({
     mutationFn: verifyPassword,
+  });
+};
+export const useLogout = () => {
+  return useMutation({ 
+    mutationFn:logout
   });
 };

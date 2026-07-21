@@ -14,10 +14,7 @@ export default function ForgotPassword() {
  const [message,setMessage]=useState("");
   const handleSendOtp = async(e:React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault(); 
-    setFlag(true);
-    // const response=await axios.post("http://localhost:5000/api/forgot",{
-    //   email
-    // },{withCredentials:true});
+    setFlag(true); 
     mutate( email ,{
       onSuccess:()=>{
         setFlag(false);

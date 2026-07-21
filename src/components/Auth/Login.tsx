@@ -41,8 +41,8 @@ export default function Login() {
       }
     } 
     mutate({
-      email:registerData?.email?.toLocaleLowerCase(),
-      password:registerData?.password,
+      email:registerData?.email ? registerData?.email?.toLocaleLowerCase() : "",
+      password:registerData?.password ? registerData?.password : "",
     },{
       onSuccess:(data)=>{
         setCurrentUser({

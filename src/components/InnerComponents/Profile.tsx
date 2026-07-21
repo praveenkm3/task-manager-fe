@@ -1,11 +1,12 @@
 import { UseAuth } from "../../contexts/AuthContext";
 import { Box, Typography, Avatar, Paper } from "@mui/material";
-import { deepPurple } from "@mui/material/colors";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { deepPurple } from "@mui/material/colors"; 
 import PlaceIcon from "@mui/icons-material/Place";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import { Random } from "random-js";
+import { useFetchUserAndAdminStatuses } from "../../reactQuery/hooks/fetchHooks";
+import Spinner from "./Spinner";
+
 const colorArray = [
   "#FFD400",
   "#39B1D1",
@@ -18,35 +19,18 @@ const colorArray = [
   "#1E104E",
 ];
 export default function Profile() {
+  
   const random = new Random();
-  const { currentUser } = UseAuth()!;
-  const [profiles, setProfiles] = useState([]);
+  const { currentUser } = UseAuth()!; 
   const role = currentUser?.role;
-  useEffect(() => {
-    async function runner() {
-      const response = await axios.post(
-        `http://localhost:5000/graphql`,
-        {
-          query: `query{
-  fetchUserAndAdminStatuses {
-    email
-    status
-    totalTasks
+  const{data,isLoading}=useFetchUserAndAdminStatuses();
+  if(isLoading){
+    return <Spinner />
   }
-}`,
-        },
-        { withCredentials: true },
-      );
-      setProfiles(response?.data?.data?.fetchUserAndAdminStatuses);
-    }
-    runner();
-  }, [currentUser, role]);
 
-  // console.log(profiles);
   const groupedData = Object.values(
-    profiles.reduce((acc, current) => {
-      const email = current.email;
-      // console.log(current);
+    data?.fetchUserAndAdminStatuses.reduce((acc, current) => {
+      const email = current.email; 
 
       if (!acc[email]) {
         acc[email] = { user: email, statuses: [] };
@@ -58,8 +42,7 @@ export default function Profile() {
 
       return acc;
     }, {}),
-  );
-  // console.log(groupedData);
+  ); 
   const statusOrder = ["TO DO", "In Progress", "On Hold", "Completed"];
 
   groupedData.forEach((user) => {
@@ -81,11 +64,11 @@ export default function Profile() {
         <Box sx={{ boxShadow: 5, height: "100vh", width: "100%" }}>
           <Box sx={{ display: "flex", gap: 1, px: 5, py: 3, boxShadow: 4 }}>
             <Avatar sx={{ bgcolor: deepPurple[500] }}>
-              {currentUser?.email[0].toUpperCase()}
+               {currentUser?.email && currentUser?.email[0].toUpperCase()} 
             </Avatar>
             <Box>
-              <Typography sx={{ mt: 1.5, fontWeight: 700, fontSize: "13px" }}>
-                {currentUser?.email.toUpperCase()}
+              <Typography sx={{ mt: 1.5, fontWeight: 700, fontSize: "13px",}}>
+                {currentUser?.email && currentUser?.email.toUpperCase()}
               </Typography>
             </Box>
 

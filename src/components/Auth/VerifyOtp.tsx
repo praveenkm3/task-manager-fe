@@ -55,7 +55,7 @@ export default function VerifyOtp() {
   async function handlePasswordSubmit() {
     mutatePassword(
       {
-        uemail: email,
+        uemail: email ?? "",
         password,
       },
       {
@@ -127,7 +127,7 @@ export default function VerifyOtp() {
                 </Alert>
               </Snackbar>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Typography variant="h5" fontWeight="bold">
+                <Typography variant="h5" sx={{fontWeight:"bold"}}>
                   Enter OTP
                 </Typography>
 
@@ -188,7 +188,7 @@ export default function VerifyOtp() {
                     {message}
                   </Alert>
                 </Snackbar>
-                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                <Typography variant="h5"  sx={{ mb: 2,fontWeight:"bold" }}>
                   Enter New Password
                 </Typography>
               </Box>

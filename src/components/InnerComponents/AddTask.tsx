@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { Button, FormLabel, IconButton, Typography } from "@mui/material";
-import { useEffect, useState, useId } from "react";
+import {useState, useId } from "react";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -9,8 +9,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import ListItemText from "@mui/material/ListItemText";
-import Select from "@mui/material/Select";
-import axios from "axios";
+import Select from "@mui/material/Select"; 
 import Snackbar from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@mui/material/Avatar";
@@ -26,6 +25,8 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { useAddTask, useFetchUsers } from "../../reactQuery/hooks/fetchHooks"; 
+import Spinner from "./Spinner";
 
 
 const ITEM_HEIGHT = 48;
@@ -39,9 +40,9 @@ const MenuProps = {
       },
     },
   },
-};
-
+}; 
 export default function Addtask() {
+  const{mutate}=useAddTask() 
   const id = useId();
   const [personName, setPersonName] = useState("");
   const [message, setMessage] = useState("");
@@ -59,26 +60,11 @@ export default function Addtask() {
     descriptionError: false,
     assigned_user_idError: false,
   });
-  const [users, setUsers] = useState<userDataType[] | null>(null);
-  useEffect(() => {
-    async function fetchUsersApi() {
-      const response=await axios.post('http://localhost:5000/graphql',{
-        query:`query{
-  fetchUsers {
-    email
-    isActive
-    userName
-    userId
-    role
-  }
-}`},{withCredentials:true});
-      // console.log(response);
-      
-      // console.log(response?.data?.data?.fetchUsers);
-      setUsers(response?.data?.data?.fetchUsers);
-    }
-    fetchUsersApi();
-  }, []);
+  
+const {data,isLoading}=useFetchUsers();
+if(isLoading){
+  return<Spinner/>
+} 
   const handleTask = (event: eventType) => {
     const { name, value } = event.target;
     setTaskData((prev) => ({ ...prev, [name]: value }));
@@ -101,33 +87,26 @@ export default function Addtask() {
     if (!assigned_user_id) { 
       setTaskError((prev)=>({...prev,assigned_user_idError:true}));
       return;
-    }
-    // console.log(taskData, dateValue,priority);
+    } 
     try {
-      const response=await axios.post("http://localhost:5000/graphql",{
-        query:`
-        mutation($input: AddTaskInput!){
-          addTask(input: $input)
-        }`,variables:{
-          input:{
-            title: taskData?.title,
-            description: taskData?.description,
+      
+      mutate({
+            title: taskData?.title || "",
+            description: taskData?.description || "",
             assigned_user_id: taskData?.assigned_user_id,  
             dueDate: dateValue,
             priority: priority,
-          }
-        }
-      },{withCredentials:true})
-      // console.log(response);
-      if (response?.data?.data.addTask==='Task Created Successfully') {
-        console.log("added");
-        setMessage("✅ Task added successfully");
-        setFlag(true);
-      } else {
-        setMessage("❌ Task added Unsuccessfully");
-        setFlag(true);
-        console.log("not added");
-      }
+          },{
+            onSuccess:()=>{
+              setMessage("✅ Task added successfully");
+              setFlag(true);
+            },
+            onError:()=>{
+              setMessage("❌ Task added Unsuccessfully");
+              setFlag(true);
+            }
+          })
+      
     } catch (error) {
       console.log(error);
     }
@@ -197,7 +176,7 @@ export default function Addtask() {
           value={taskData?.title}
           onChange={handleTask}
           sx={{ width: "100%" }}
-          error={taskData?.title?.trim()?.length>0 ? false : taskError?.titleError}
+          error={taskData?.title &&  taskData?.title?.trim()?.length>0 ? false : taskError?.titleError}
         />
         <FormLabel
           htmlFor="description"
@@ -208,7 +187,7 @@ export default function Addtask() {
           </Typography>
         </FormLabel>
         <TextField 
-        error={taskData?.description?.trim()?.length>0 ? false : taskError?.descriptionError}
+        error={taskData?.description && taskData?.description?.trim()?.length>0 ? false : taskError?.descriptionError}
           id="description"
           name="description"
           value={taskData?.description}
@@ -282,7 +261,7 @@ export default function Addtask() {
             MenuProps={MenuProps}
             label="Pick User From Here"
           >
-            {users?.map((user: userDataType) => {
+            {data?.fetchUsers?.map((user: userDataType) => {
               return (
                 <MenuItem
                   key={user.email}

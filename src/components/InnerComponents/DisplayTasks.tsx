@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Chip, Typography, TextField, Box } from "@mui/material";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { UseAuth } from "../../contexts/AuthContext";
-import axios from "axios";
 import { Link } from "react-router";
 import highPriorityIcon from "../../../public/assets/highPriority.png";
 import equalIcon from "../../../public/assets/equal.svg";
@@ -13,9 +12,10 @@ import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { useFetchTasks } from "../../reactQuery/hooks/fetchHooks";
+import Spinner from "./Spinner";
 
 //graphQL
-
 const ILikeInput = (props) => {
   const { item, applyValue } = props; //data and setter function
   // console.log(item);
@@ -171,7 +171,8 @@ export default function DisplayTasks() {
       headerName: "Due Date",
       minWidth: 130,
       type: "string",
-      valueGetter: (value) => (value ? dayjs(value).format("YYYY-MM-DD"): null),
+      valueGetter: (value) =>
+        value ? dayjs(value).format("YYYY-MM-DD") : null,
       filterOperators: [betweenOperator],
       renderHeader() {
         return (
@@ -256,9 +257,9 @@ export default function DisplayTasks() {
       filterOperators: [ilikeOperator],
     };
   }
-  const [rows, setRows] = useState([]);
+  // const [rows, setRows] = useState([]);
   const [records, setRecords] = useState(15);
-  const [total, setTotal] = useState(0);
+  // const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   //sort
   const [sortColumn, setSortColumn] = useState("");
@@ -267,7 +268,7 @@ export default function DisplayTasks() {
   const [filterColumn, setFilterColumn] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [filterOperator, setFilterOperator] = useState("");
-
+  const [debounceFilter, setDebounceFilter] = useState("");
   function handleSortChange(event) {
     const colName = event[0]?.field;
     setSortColumn(colName);
@@ -279,81 +280,44 @@ export default function DisplayTasks() {
   }
   function handleFilterChange(event) {
     try {
-      const { field = "", operator = "", value = "" } = event?.items[0];
+      const { field = "", operator = "", value = "" } = event?.items[0] || {};
       setFilterColumn(field);
-      setFilterValue(value);
+      setDebounceFilter(value);
       setFilterOperator(operator);
     } catch (error) {
       console.log(error);
     }
   }
-
+  //filter debouncing
   useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        async function runFilter() {
-          try {
-            const res2 = await axios.post(
-              "http://localhost:5000/graphql",
-              {
-                query: `query {
-                            tasks {
-                                result {
-                                    tasks_taskId
-                                    tasks_title
-                                    tasks_description 
-                                    tasks_status 
-                                    tasks_dueDate 
-                                    users_email 
-                                    admins_email 
-                                    tasks_priority 
-                                }
-                                length
-                            }
-                        }`,
-                body: {
-                  page: page,
-                  records: records,
-                  filterColumn: filterValue ? filterColumn : undefined,
-                  filterValue: Array.isArray(filterValue)
-                    ? filterValue[0] && filterValue[1]
-                      ? filterValue
-                      : undefined
-                    : filterValue || undefined,
-                  filterOperator: filterValue ? filterOperator : undefined,
-                  sortColumnName: sortColumn || undefined,
-                  sortOrder: sortOrder || undefined,
-                },
-              },
-              { withCredentials: true },
-            );
-            setRows(res2?.data?.data?.tasks?.result);
-            setTotal(res2?.data?.data?.tasks?.length);
-            
-          } catch (error) {
-            console.log(error);
-          }
-        }
-        runFilter();
-      },
-      filterValue ? 900 : 0,
-    );
+    const timer = setTimeout(() => {
+      setFilterValue(debounceFilter);
+    }, 500);
     return () => clearTimeout(timer);
-  }, [
-    page,
-    records,
-    filterColumn,
-    filterValue,
-    filterOperator,
-    sortColumn,
-    sortOrder,
-    currentUser,
-  ]);
+  }, [debounceFilter]);
 
+  const { data, isLoading } = useFetchTasks({
+    page: page,
+    records: records,
+    filterColumn: filterValue ? filterColumn : undefined,
+    filterValue: Array.isArray(filterValue)
+      ? filterValue[0] && filterValue[1]
+        ? filterValue
+        : undefined
+      : filterValue || undefined,
+    filterOperator: filterValue ? filterOperator : undefined,
+    sortColumnName: sortColumn || undefined,
+    sortOrder: sortOrder || undefined,
+  });
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+  //  console.log(data?.tasks?.result,data?.tasks?.length);
   return (
     <>
       <DataGrid
-        rows={rows}
+        rows={data?.tasks?.result || []}
         columns={columns}
         sortingMode="server"
         getRowId={(row) => row.tasks_taskId}
@@ -362,7 +326,7 @@ export default function DisplayTasks() {
         paginationModel={{ page: page - 1, pageSize: records }}
         paginationMode="server"
         pageSizeOptions={[1, 15, 50, 100]}
-        rowCount={total}
+        rowCount={data?.tasks?.length || 0}
         filterMode="server"
         onFilterModelChange={handleFilterChange}
         slotProps={{

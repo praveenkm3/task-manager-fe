@@ -8,7 +8,7 @@ export async function register(data: {
   username: string;
   email: string;
   password: string;
-  adminSecretKey: string;
+  adminSecretKey: number | undefined;
 }) {
   const response = await api.post("/api/register", data);
   return response?.data;
@@ -26,5 +26,9 @@ export async function verifyOtp(data:{uemail:string,otp:string}){
 
 export async function verifyPassword(data:{uemail:string,password:string}){
     const response=await api.post("/api/change-password",data,{withCredentials:true});
+    return response?.data;
+}
+export async function logout(){
+    const response=await api.post("/api/logout",{withCredentials:true});
     return response?.data;
 }
