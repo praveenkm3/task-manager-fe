@@ -4,7 +4,7 @@ export const api=axios.create({
     baseURL:"http://localhost:5000",
     withCredentials:true
 });
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;

@@ -10,13 +10,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { Typography, type SelectChangeEvent } from "@mui/material";
-import { type createTaskDataType, type userDataType } from "../../types";
-
+import { type createTaskDataType, type userDataType } from "../../types"; 
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-
 import React from "react";
 import {
   Avatar,
@@ -34,12 +32,17 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { UseAuth } from "../../contexts/AuthContext";
 import dayjs from "dayjs";
+import {
+  useDeleteTask,
+  useFetchOneTask,
+  useFetchUsers,
+  useUpdateTask,
+} from "../../reactQuery/hooks/fetchHooks";
+import Spinner from "./Spinner";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -55,57 +58,37 @@ const MenuProps = {
 };
 
 export default function SpecificTask() {
+
+
   const [dateValue, setDateValue] = useState(dayjs());
   const [priority, setPriority] = useState("");
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
-  const { currentUser } = UseAuth();
+  const { currentUser } = UseAuth()!;
   const [flag, setFlag] = useState(false);
   const [radio, setRadio] = useState("TO DO");
   const [data, setData] = useState<createTaskDataType | null>(null);
   const { id } = useParams();
+  const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState<boolean>(false);
   const taskId = parseInt(id as string);
+  const { data: taskOneData, isLoading,isError:getOneTaskError } = useFetchOneTask(taskId);
+  const { data: usersData } = useFetchUsers(currentUser?.role === "admin");
+  const { mutate } = useDeleteTask();
+  const { mutate: updateMutate } = useUpdateTask();
+ 
+
   useEffect(() => {
-    async function getOneTask() {
-      const response2 = await axios.post(
-        "http://localhost:5000/graphql",
-        {
-          query: `query($taskId: Int!){
-  getOneTask(taskId: $taskId) {
-    admins_email
-    tasks_description
-    tasks_dueDate
-    tasks_priority
-    tasks_status
-    tasks_taskId
-    tasks_title
-    users_email
-    admins_userid
-    users_userid
-  }
-}`,
-          variables: {
-            taskId: taskId,
-          },
-        },
-        { withCredentials: true },
-      );
-      // console.log(response2?.data?.data.getOneTask[0]);
-      setData(response2?.data?.data.getOneTask[0]);
+    if (taskOneData?.getOneTask) { 
+      const current=taskOneData?.getOneTask[0]; 
+      setData(current);
+      setPriority(current.tasks_priority); 
+      setRadio(current.tasks_status); 
+      setDateValue(dayjs(current?.tasks_dueDate));
     }
-    getOneTask();
-  }, [taskId, currentUser.role]);
-  useEffect(() => {
-    if (data?.tasks_priority) {
-      setPriority(data?.tasks_priority);
-    }
-    if (data?.tasks_status) { 
-      setRadio(data?.tasks_status);
-    }
-    if (data?.tasks_dueDate) {
-      setDateValue(dayjs(data?.tasks_dueDate));
-    }
-  }, [data?.tasks_taskId]);
+  }, [isLoading,taskOneData?.getOneTask]);
+
+
 
   const action = (
     <>
@@ -126,106 +109,53 @@ export default function SpecificTask() {
     setPersonName(value);
     setData((prev) => ({ ...prev, users_userid: value }));
   };
-  const [users, setUsers] = useState<userDataType | null>(null);
-  useEffect(() => {
-    async function fetchUsersApi() {
-      const response=await axios.post('http://localhost:5000/graphql',{
-        query:`query{
-  fetchUsers {
-    email
-    isActive
-    userName
-    userId
-    role
-  }
-}`},{withCredentials:true});
-      // console.log(response);
-      // console.log(response?.data?.data?.fetchUsers);
-      setUsers(response?.data?.data?.fetchUsers);
-    }
-    if(currentUser?.role==='admin'){
-      fetchUsersApi();
-    }
-  }, [currentUser.role]);
-  const [edit, setEdit] = useState<boolean>(false);
+
   function handleEdit() {
     setEdit(true);
     setPersonName(data?.users_userid);
   }
   function handleDelete() {
-
-    async function deleteTaskByAdmin() {
-      const response=await axios.post('http://localhost:5000/graphql',{
-        query:`
-            mutation($taskId: Int!){
-                  deleteTask(taskId: $taskId)
-            }
-        `,
-        variables:{
-          taskId:data?.tasks_taskId
-        }
-      },{withCredentials:true})
-      // console.log(response);
-      if (response?.data?.data?.deleteTask==='Task Deleted Successfully') {
-        console.log("deleted");
+    mutate(taskId, {
+      onSuccess: () => {
         setMessage("✅ Task deleted successfully");
-        navigate("/tasks");
         setFlag(true);
-      } else {
+        navigate("/tasks");
+      },
+      onError: () => {
         setMessage("❌ Task deleted Unsuccessfully");
         setFlag(true);
-        console.log("not deleted");
-      }
-      
-      
-    }
-    deleteTaskByAdmin();
+      },
+    });
   }
   function handleUpdate() {
-    async function updateTask() {
-      // console.log(data);
-      // console.log(personName);
-      const res2 = await axios.post(
-        "http://localhost:5000/graphql",
-        {
-          query: `
-      mutation($input: UpdateTaskInput!) {
-  updateTask(input: $input)
-}
-    `,
-          variables: {
-            input: {
-              taskId: data?.tasks_taskId,
-              title: data?.tasks_title,
-              description: data?.tasks_description,
-              assigned_user_id: personName,
-              duedate: dateValue,
-              priority: priority,
-              status: radio,
-            },
-          },
+    updateMutate(
+      {
+        taskId: data?.tasks_taskId,
+        title: data?.tasks_title,
+        description: data?.tasks_description,
+        assigned_user_id: personName,
+        duedate: dateValue,
+        priority: priority,
+        status: radio,
+      },
+      {
+        onSuccess: () => {
+          setMessage("✅ Task Updated successfully");
+          setFlag(true);
+          setEdit(false);
         },
-        { withCredentials: true },
-      );
-      // console.log(res2?.data?.data?.updateTask);
-      if (res2?.data?.data?.updateTask === "Update Success") {
-        setMessage("✅ Task Updated successfully");
-        setFlag(true);
-      } else {
-        setMessage("❌ Task Updated Unsuccessfully");
-        setFlag(true);
-        console.log("not added");
-      }
-    }
-    updateTask();
+        onError: () => {
+          setMessage("❌ Task Updated Unsuccessfully");
+          setFlag(true);
+        },
+      },
+    );
+  
   }
   function handleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    const { name, value } = event.target; 
-    setData((prev) => ({ ...prev, [name]: value }));
-    // console.log("inside handle change ");
+    const { name, value } = event.target;
+    setData((prev) => ({ ...prev, [name]: value })); 
   }
-
-  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -234,7 +164,12 @@ export default function SpecificTask() {
   const handleClose = () => {
     setOpen(false);
   };
-
+ if (isLoading) {
+    return <Spinner />;
+  }
+if(getOneTaskError){
+  navigate('/tasks');
+}
   return (
     <>
       <Box
@@ -262,7 +197,7 @@ export default function SpecificTask() {
             placeholder="Enter Task Title"
             name="tasks_title"
             value={data?.tasks_title || ""}
-            onChange={currentUser.role === "admin" && handleChange}
+            onChange={currentUser?.role === "admin" ?  handleChange : undefined}
             disabled={!edit}
             sx={{
               width: "100%",
@@ -301,43 +236,43 @@ export default function SpecificTask() {
           {currentUser.role === "admin" && edit && (
             <>
               <>
-              <FormControl sx={{ mb: 0 }} disabled={!edit}>
-                <Typography sx={{ color: "black", fontSize: "21px"}}>
-                  Change Status
-                </Typography>
-                <RadioGroup
-                  value={radio}
-                  name="radio-buttons-group"
-                  onChange={(event) => setRadio(event.target.value)} 
-                >
-                  <Box sx={{display:"flex"}}>
-                    <FormControlLabel
-                    value="TO DO"
-                    control={<Radio color="secondary" />}
-                    label="TO DO"
-                    sx={{width:100}}
-                  />
-                  <FormControlLabel
-                    value="Completed"
-                    control={<Radio color="success" />}
-                    label="Completed"
-                    sx={{width:150}}
-                  />
-                  <FormControlLabel
-                    value="In Progress"
-                    control={<Radio color="warning" />}
-                    label="In Progress"
-                    sx={{width:150}}
-                  />
-                  <FormControlLabel
-                    value="On Hold"
-                    control={<Radio color="error" />}
-                    label="On Hold"
-                    sx={{width:150}}
-                  />
-                  </Box>
-                </RadioGroup>
-              </FormControl>
+                <FormControl sx={{ mb: 0 }} disabled={!edit}>
+                  <Typography sx={{ color: "black", fontSize: "21px" }}>
+                    Change Status
+                  </Typography>
+                  <RadioGroup
+                    value={radio}
+                    name="radio-buttons-group"
+                    onChange={(event) => setRadio(event.target.value)}
+                  >
+                    <Box sx={{ display: "flex" }}>
+                      <FormControlLabel
+                        value="TO DO"
+                        control={<Radio color="secondary" />}
+                        label="To Do"
+                        sx={{ width: 100 }}
+                      />
+                      <FormControlLabel
+                        value="Completed"
+                        control={<Radio color="success" />}
+                        label="Completed"
+                        sx={{ width: 150 }}
+                      />
+                      <FormControlLabel
+                        value="In Progress"
+                        control={<Radio color="warning" />}
+                        label="In Progress"
+                        sx={{ width: 150 }}
+                      />
+                      <FormControlLabel
+                        value="On Hold"
+                        control={<Radio color="error" />}
+                        label="On Hold"
+                        sx={{ width: 150 }}
+                      />
+                    </Box>
+                  </RadioGroup>
+                </FormControl>
               </>
               <Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -356,27 +291,33 @@ export default function SpecificTask() {
                   </DemoContainer>
                 </LocalizationProvider>
               </Box>
-              
-             <Box>
-              <Typography variant="h5" color="initial" sx={{}}>Priority</Typography>
-               <RadioGroup
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                sx={{ display: "flex", flexDirection: "row" }}
-              >
-                <FormControlLabel value="Low" control={<Radio />} label="Low" />
-                <FormControlLabel
-                  value="Medium"
-                  control={<Radio />}
-                  label="Medium"
-                />
-                <FormControlLabel
-                  value="High"
-                  control={<Radio />}
-                  label="High"
-                />
-              </RadioGroup>
-             </Box>
+
+              <Box>
+                <Typography variant="h5" color="initial" sx={{}}>
+                  Priority
+                </Typography>
+                <RadioGroup
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  sx={{ display: "flex", flexDirection: "row" }}
+                >
+                  <FormControlLabel
+                    value="Low"
+                    control={<Radio />}
+                    label="Low"
+                  />
+                  <FormControlLabel
+                    value="Medium"
+                    control={<Radio />}
+                    label="Medium"
+                  />
+                  <FormControlLabel
+                    value="High"
+                    control={<Radio />}
+                    label="High"
+                  />
+                </RadioGroup>
+              </Box>
 
               <FormLabel
                 htmlFor="selectUser"
@@ -399,7 +340,7 @@ export default function SpecificTask() {
                   size="small"
                   sx={{ borderRadius: 3 }}
                 >
-                  {users?.map((user: userDataType) => {
+                  {usersData?.fetchUsers?.map((user: userDataType) => {
                     return (
                       <MenuItem
                         key={user.email}
@@ -421,7 +362,7 @@ export default function SpecificTask() {
           )}
           {currentUser?.role === "user" && (
             <>
-              <FormControl sx={{ width: "30%", mt: 0 }} >
+              <FormControl sx={{ width: "30%", mt: 0 }}>
                 <Typography sx={{ color: "black", fontSize: "21px", pb: 2 }}>
                   Change Status
                 </Typography>

@@ -34,6 +34,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import jiraSvg from "../../public/assets/jira copy.svg"; 
 import { useNavigate } from "react-router";
 import { useLogout } from "../reactQuery/hooks/authHooks";
+import queryClient from "../reactQuery/query";
 
 const drawerWidth = 240;
 
@@ -129,6 +130,7 @@ export default function Sidebar({ children }:Props) {
   const handleLogout = async () => {
     mutate(undefined,{
     onSuccess:()=>{
+      queryClient.clear();
       removeUser();
       navigate('/login')
     },onError:(err)=>{

@@ -14,6 +14,7 @@ import Snackbar from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@mui/material/Avatar";
 import dayjs from "dayjs";
+import { UseAuth } from "../../contexts/AuthContext";
 import {
   type eventType,
   type taskDataType,
@@ -26,8 +27,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { useAddTask, useFetchUsers } from "../../reactQuery/hooks/fetchHooks"; 
-import Spinner from "./Spinner";
-
+import Spinner from "./Spinner"; 
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -42,6 +42,7 @@ const MenuProps = {
   },
 }; 
 export default function Addtask() {
+  const{currentUser}=UseAuth()!;
   const{mutate}=useAddTask() 
   const id = useId();
   const [personName, setPersonName] = useState("");
@@ -61,7 +62,7 @@ export default function Addtask() {
     assigned_user_idError: false,
   });
   
-const {data,isLoading}=useFetchUsers();
+const {data,isLoading}=useFetchUsers(currentUser?.role ==='admin');
 if(isLoading){
   return<Spinner/>
 } 

@@ -6,8 +6,12 @@ import {
   fetchDates,
   fetchTaskStatuses,
   fetchUserAndAdminStatuses,
-  fetchPriorityCount
+  fetchPriorityCount,
+  fetchOneTask,
+  deleteTask,
+  updateTask,
 } from "../../api/fetchAPI";
+import queryClient from "../query";
 
 export const useFetchTasks = (params: {
   page: number;
@@ -73,13 +77,31 @@ export const useAddTask = () => {
       });
       return response;
     },
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        queryKey:['tasks']
+      })
+      queryClient.invalidateQueries({
+        queryKey:["dates"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["task-statuses"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["user-admin-status"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["task-priority"]
+      })
+    }
   });
 };
-export const useFetchUsers = () => {
+export const useFetchUsers = (enabled: boolean) => {
   return useQuery({
     queryKey: ["users"],
     queryFn: async () => await fetchUsers(),
     staleTime: 2 * 60 * 1000,
+    enabled: enabled,
   });
 };
 export const useFetchDates = () => {
@@ -108,5 +130,69 @@ export const useFetchPriorityCount = () => {
     queryKey: ["task-priority"],
     queryFn: async () => await fetchPriorityCount(),
     staleTime: 2 * 60 * 1000,
+  });
+};
+export const useFetchOneTask = (taskId: number) => {
+  return useQuery({
+    queryKey: ["one-task", taskId],
+    queryFn: async () => {
+      return await fetchOneTask(taskId);
+    },
+  });
+};
+export const useDeleteTask = () => {
+  return useMutation({
+    mutationFn: async (taskId: number) => {
+      return await deleteTask(taskId);
+    },
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+                queryKey:['tasks']
+        })
+        queryClient.invalidateQueries({
+          queryKey:["dates"]
+        })
+        queryClient.invalidateQueries({
+          queryKey:["task-statuses"]
+        })
+        queryClient.invalidateQueries({
+          queryKey:["user-admin-status"]
+        })
+        queryClient.invalidateQueries({
+          queryKey:["task-priority"]
+        })
+    }
+  });
+};
+export const useUpdateTask = () => {
+  return useMutation({
+    mutationFn: async (data: {
+      taskId: number;
+      title: string;
+      description: string;
+      assigned_user_id: string;
+      duedate: string;
+      priority: string;
+      status: string;
+    }) => {
+      return updateTask(data);
+    },
+    onSuccess:()=>{
+      queryClient.invalidateQueries({
+        queryKey:['tasks']
+        })
+      queryClient.invalidateQueries({
+        queryKey:["dates"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["task-statuses"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["user-admin-status"]
+      })
+      queryClient.invalidateQueries({
+        queryKey:["task-priority"]
+      })
+    }
   });
 };

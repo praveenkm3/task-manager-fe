@@ -5,7 +5,13 @@ import {
 const queryClient = new QueryClient({
   defaultOptions:{
     queries:{
-      refetchOnWindowFocus:false
+      refetchOnWindowFocus:false,
+      retry:(failCount,error:any)=>{
+        if(error?.response?.status===401){
+          return false;
+        } 
+        return failCount<2;
+      }
     }
   }
 })
